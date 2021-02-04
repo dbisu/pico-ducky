@@ -1,0 +1,4 @@
+REM Testing Script
+STRING atom test.txt
+DELAY 2000
+GUI L
