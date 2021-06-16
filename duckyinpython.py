@@ -70,7 +70,7 @@ print("Running payload.dd")
 previousLine = ""
 duckyScript = f.readlines()
 for line in duckyScript:
-    line = line.replace('\r','')
+    line = line.rstrip()
     if(line[0:6] == "REPEAT"):
         for i in range(int(line[7:])):
             #repeat the last command
