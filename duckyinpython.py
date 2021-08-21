@@ -3,6 +3,8 @@ from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 from adafruit_hid.keycode import Keycode
 import time
+import digitalio
+from board import *
 
 duckyCommands = ["WINDOWS", "GUI", "APP", "MENU", "SHIFT", "ALT", "CONTROL", "CTRL", "DOWNARROW", "DOWN",
 "LEFTARROW", "LEFT", "RIGHTARROW", "RIGHT", "UPARROW", "UP", "BREAK", "PAUSE", "CAPSLOCK", "DELETE", "END",
@@ -63,22 +65,34 @@ layout = KeyboardLayoutUS(kbd)
 #sleep a the start to allow the device to be recognized by the host computer
 time.sleep(.5)
 
-defaultDelay = 0
-duckyScriptPath = "payload.dd"
-f = open(duckyScriptPath,"r",encoding='utf-8')
-print("Running payload.dd")
-previousLine = ""
-duckyScript = f.readlines()
-for line in duckyScript:
-    line = line.rstrip()
-    if(line[0:6] == "REPEAT"):
-        for i in range(int(line[7:])):
-            #repeat the last command
-            parseLine(previousLine)
-            time.sleep(float(defaultDelay)/1000)
-    else:
-        parseLine(line)
-        previousLine = line
-    time.sleep(float(defaultDelay)/1000)
 
-print("Done...")
+# check GPIO0 for program switch
+# easiest way to implement is to run a jumper from pin 0 (GPIO0) to pin3 (GND)
+progStatus = False
+progStatusPin = digitalio.DigitalInOut(GP0)
+progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
+progStatus = progStatusPin.value
+
+if(progStatus == True):
+    #not in programming state, run script file
+    defaultDelay = 0
+    duckyScriptPath = "payload.dd"
+    f = open(duckyScriptPath,"r",encoding='utf-8')
+    print("Running payload.dd")
+    previousLine = ""
+    duckyScript = f.readlines()
+    for line in duckyScript:
+        line = line.rstrip()
+        if(line[0:6] == "REPEAT"):
+            for i in range(int(line[7:])):
+                #repeat the last command
+                parseLine(previousLine)
+                time.sleep(float(defaultDelay)/1000)
+        else:
+            parseLine(line)
+            previousLine = line
+        time.sleep(float(defaultDelay)/1000)
+
+    print("Done...")
+else:
+    print("Update new payload file")

@@ -30,3 +30,8 @@ $ cp duckyinpython.py /<path to media device>/code.py
 Copy your Ducky Scipt file as payload.dd
 
 $ cp <duckyscriptfile> /path to media device>/payload.dd
+
+# NEW: added support for a programming switch.  
+Tie pin 0 (GPIO0) to pin 3 (GND) to not automatically run payloads.
+Easiest way to do this is to add a jumper wire between those pins.
+![jumper wire](pics/jumper.png)
