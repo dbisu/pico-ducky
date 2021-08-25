@@ -36,11 +36,9 @@ def runScriptLine(line):
     for k in line:
         kbd.press(k)
     kbd.release_all()
-    return
 
 def sendString(line):
     layout.write(line)
-    return
 
 def parseLine(line):
     if(line[0:3] == "REM"):
@@ -57,7 +55,6 @@ def parseLine(line):
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
-    return
 
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayoutUS(kbd)
@@ -72,10 +69,9 @@ progStatus = False
 progStatusPin = digitalio.DigitalInOut(GP0)
 progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
 progStatus = progStatusPin.value
-
+defaultDelay = 0
 if(progStatus == True):
     #not in programming state, run script file
-    defaultDelay = 0
     duckyScriptPath = "payload.dd"
     f = open(duckyScriptPath,"r",encoding='utf-8')
     print("Running payload.dd")
