@@ -27,7 +27,7 @@ Copy duckyinpython.py to the root of the media device as code.py
 
 $ cp duckyinpython.py /<path to media device>/code.py
 
-Copy your Ducky Scipt file as payload.dd
+Copy your Ducky Script file as payload.dd
 
 $ cp <duckyscriptfile> /path to media device>/payload.dd
 
