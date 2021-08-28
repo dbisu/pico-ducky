@@ -27,8 +27,8 @@ def convertLine(line):
     newline = []
     print(line)
     for j in range(len(keycodeCommands)):
-			if line.find(duckyCommands[j]) != -1:
-				newline.append(keycodeCommands[j])
+		    if line.find(duckyCommands[j]) != -1:
+		    	newline.append(keycodeCommands[j])
     print(newline)
     return newline
 
@@ -42,7 +42,7 @@ def sendString(line):
 
 def parseLine(line):
     if(line[0:3] == "REM"):
-        #comments - ignore
+        # ignore ducky script comments
         print("")
     elif(line[0:5] == "DELAY"):
         time.sleep(float(line[6:])/1000)
@@ -59,19 +59,18 @@ def parseLine(line):
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayoutUS(kbd)
 
-#sleep a the start to allow the device to be recognized by the host computer
+# sleep at the start to allow the device to be recognized by the host computer
 time.sleep(.5)
 
-
-# check GPIO0 for program switch
-# easiest way to implement is to run a jumper from pin 0 (GPIO0) to pin3 (GND)
+# check GP0 for setup mode
+# see setup mode for instructions
 progStatus = False
 progStatusPin = digitalio.DigitalInOut(GP0)
 progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
 progStatus = progStatusPin.value
 defaultDelay = 0
 if(progStatus == True):
-    #not in programming state, run script file
+    # not in setup mode, inject the payload
     duckyScriptPath = "payload.dd"
     f = open(duckyScriptPath,"r",encoding='utf-8')
     print("Running payload.dd")
@@ -89,6 +88,6 @@ if(progStatus == True):
             previousLine = line
         time.sleep(float(defaultDelay)/1000)
 
-    print("Done...")
+    print("Done")
 else:
-    print("Update new payload file")
+    print("Update your payload")
