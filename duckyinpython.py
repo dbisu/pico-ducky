@@ -1,6 +1,7 @@
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
-from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+from adafruit_hid.keyboard_layout_win_de_de import KeyboardLayout
+from adafruit_hid.keyboard_layout_win_de_de import KeyboardLayoutWinDeDe
 from adafruit_hid.keycode import Keycode
 import time
 import digitalio
@@ -59,7 +60,7 @@ def parseLine(line):
         runScriptLine(newScriptLine)
 
 kbd = Keyboard(usb_hid.devices)
-layout = KeyboardLayoutUS(kbd)
+layout = KeyboardLayoutWinDeDe(kbd)
 
 # sleep at the start to allow the device to be recognized by the host computer
 time.sleep(.5)
