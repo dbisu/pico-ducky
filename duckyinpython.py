@@ -46,7 +46,7 @@ def sendString(line):
 def parseLine(line):
     if(line[0:3] == "REM"):
         # ignore ducky script comments
-        print("")
+        pass
     elif(line[0:5] == "DELAY"):
         time.sleep(float(line[6:])/1000)
     elif(line[0:6] == "STRING"):
