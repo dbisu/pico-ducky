@@ -34,7 +34,7 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 7. Find a script [here](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Payloads) or [create your own one using Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) and save it as `payload.dd` in the Pico.
 
-8. Be careful, if your device isn't in [setup mode](#setup-mode), the device will reboot and after half a second, the script will run. 
+8. Be careful, if your device isn't in [setup mode](#setup-mode), the device will reboot and after half a second, the script will run.
 
 ### Setup mode
 
@@ -43,9 +43,13 @@ The easiest way to so is by using a jumper wire between those pins as seen bello
 
 ![Setup mode with a jumper](images/setup-mode.png)
 
+## Adding non-US keybaords
+
+Instructions for adding non-US keyboards can be found [here](keyboard-layouts.md).
+
 ## Useful links and resources
 
-### Docs 
+### Docs
 
 [CircuitPython](https://circuitpython.readthedocs.io/en/6.3.x/README.html)
 
