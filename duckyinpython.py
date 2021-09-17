@@ -1,36 +1,47 @@
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
-from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
-from adafruit_hid.keycode import Keycode
 import time
 import digitalio
 from board import *
 
-duckyCommands = ["WINDOWS", "GUI", "APP", "MENU", "SHIFT", "ALT", "CONTROL", "CTRL", "DOWNARROW", "DOWN",
-"LEFTARROW", "LEFT", "RIGHTARROW", "RIGHT", "UPARROW", "UP", "BREAK", "PAUSE", "CAPSLOCK", "DELETE", "END",
-"ESC", "ESCAPE", "HOME", "INSERT", "NUMLOCK", "PAGEUP", "PAGEDOWN", "PRINTSCREEN", "SCROLLLOCK", "SPACE",
-"TAB", "ENTER", " a", " b", " c", " d", " e", " f", " g", " h", " i", " j", " k", " l", " m", " n", " o", " p", " q", " r", " s", " t",
-" u", " v", " w", " x", " y", " z", " A", " B", " C", " D", " E", " F", " G", " H", " I", " J", " K", " L", " M", " N", " O", " P",
-" Q", " R", " S", " T", " U", " V", " W", " X", " Y", " Z", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"]
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
+from adafruit_hid.keycode import Keycode
+# from keyboard_layout_win_fr import KeyboardLayout
+# from keycode_win_fr import Keycode
 
-keycodeCommands = [Keycode.WINDOWS, Keycode.GUI, Keycode.APPLICATION, Keycode.APPLICATION, Keycode.SHIFT, Keycode.ALT, Keycode.CONTROL,
-Keycode.CONTROL, Keycode.DOWN_ARROW, Keycode.DOWN_ARROW ,Keycode.LEFT_ARROW, Keycode.LEFT_ARROW, Keycode.RIGHT_ARROW, Keycode.RIGHT_ARROW,
-Keycode.UP_ARROW, Keycode.UP_ARROW, Keycode.PAUSE, Keycode.PAUSE, Keycode.CAPS_LOCK, Keycode.DELETE, Keycode.END, Keycode.ESCAPE,
-Keycode.ESCAPE, Keycode.HOME, Keycode.INSERT, Keycode.KEYPAD_NUMLOCK, Keycode.PAGE_UP, Keycode.PAGE_DOWN, Keycode.PRINT_SCREEN,
-Keycode.SCROLL_LOCK, Keycode.SPACE, Keycode.TAB, Keycode.ENTER, Keycode.A, Keycode.B, Keycode.C, Keycode.D, Keycode.E, Keycode.F, Keycode.G,
-Keycode.H, Keycode.I, Keycode.J, Keycode.K, Keycode.L, Keycode.M, Keycode.N, Keycode.O, Keycode.P, Keycode.Q, Keycode.R, Keycode.S, Keycode.T,
-Keycode.U, Keycode.V, Keycode.W, Keycode.X, Keycode.Y, Keycode.Z, Keycode.A, Keycode.B, Keycode.C, Keycode.D, Keycode.E, Keycode.F,
-Keycode.G, Keycode.H, Keycode.I, Keycode.J, Keycode.K, Keycode.L, Keycode.M, Keycode.N, Keycode.O, Keycode.P,
-Keycode.Q, Keycode.R, Keycode.S, Keycode.T, Keycode.U, Keycode.V, Keycode.W, Keycode.X, Keycode.Y, Keycode.Z,
-Keycode.F1, Keycode.F2, Keycode.F3, Keycode.F4, Keycode.F5, Keycode.F6, Keycode.F7, Keycode.F8, Keycode.F9,
-Keycode.F10, Keycode.F11, Keycode.F12]
+duckyConvert = {
+    "APP": "APPLICATION",
+    "MENU": "APPLICATION",
+    "CTRL": "CONTROL",
+    "DOWNARROW": "DOWN_ARROW",
+    "DOWN": "DOWN_ARROW",
+    "LEFTARROW": "LEFT_ARROW",
+    "LEFT": "LEFT_ARROW",
+    "RIGHTARROW": "RIGHT_ARROW",
+    "RIGHT": "RIGHT_ARROW",
+    "UPARROW": "UP_ARROW",
+    "UP": "UP_ARROW",
+    "BREAK": "PAUSE",
+    "CAPSLOCK": "CAPS_LOCK",
+    "ESC": "ESCAPE",
+    "NUMLOCK": "KEYPAD_NUMLOCK",
+    "PAGEUP": "PAGE_UP",
+    "PAGEDOWN": "PAGE_DOWN",
+    "PRINTSCREEN": "PRINT_SCREEN",
+    "SCROLLLOCK": "SCROLL_LOCK",
+}
 
 def convertLine(line):
     newline = []
     print(line)
-    for j in range(len(keycodeCommands)):
-		    if line.find(duckyCommands[j]) != -1:
-		    	newline.append(keycodeCommands[j])
+    for word in line.split(" "):
+        type_word = word.upper()
+        if type_word in duckyConvert:
+            type_word = duckyConvert[type_word]
+        if hasattr(Keycode, type_word):
+            newline.append(getattr(Keycode, type_word))
+        else:
+            print(f"Unknown key: <{type_word}>")
     print(newline)
     return newline
 
@@ -59,7 +70,7 @@ def parseLine(line):
         runScriptLine(newScriptLine)
 
 kbd = Keyboard(usb_hid.devices)
-layout = KeyboardLayoutUS(kbd)
+layout = KeyboardLayout(kbd)
 
 # sleep at the start to allow the device to be recognized by the host computer
 time.sleep(.5)
