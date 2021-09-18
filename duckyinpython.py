@@ -36,11 +36,10 @@ def convertLine(line):
     print(line)
     for word in line.split(" "):
         type_word = word.upper()
-        if type_word in duckyConvert:
-            type_word = duckyConvert[type_word]
+        type_word = duckyConvert.get(type_word, type_word)
         if hasattr(Keycode, type_word):
             newline.append(getattr(Keycode, type_word))
-        else:
+        elif type_word != "":
             print(f"Unknown key: <{type_word}>")
     print(newline)
     return newline
