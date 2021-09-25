@@ -20,13 +20,13 @@
 
 Install and have your USB Rubber Ducky working in less than 5 minutes.
 
-1. Download [CircuitPython for the Raspberry Pi Pico](https://circuitpython.org/board/raspberry_pi_pico/).
+1. Download [CircuitPython for the Raspberry Pi Pico](https://circuitpython.org/board/raspberry_pi_pico/). *Updated to 7.0.0
 
 2. Plug the device into a USB port. It will show up as a removable media device named `RPI-RP2`.
 
 3. Copy the downloaded `.uf2` file to the root of the Pico (`RPI-RP2`). The device will reboot and after a second or so, it will reconnect as `CIRCUITPY`.
 
-4. Download `adafruit-circuitpython-bundle-6.x-mpy-YYYYMMDD.zip` [here](https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/latest) and extract it outside the device.
+4. Download `adafruit-circuitpython-bundle-7.x-mpy-YYYYMMDD.zip` [here](https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/latest) and extract it outside the device.
 
 5. Navigate to `lib` in the recently extracted folder and copy `adafruit_hid` to the `lib` folder in your Raspberry Pi Pico.
 
@@ -34,7 +34,7 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 7. Find a script [here](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Payloads) or [create your own one using Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) and save it as `payload.dd` in the Pico.
 
-8. Be careful, if your device isn't in [setup mode](#setup-mode), the device will reboot and after half a second, the script will run. 
+8. Be careful, if your device isn't in [setup mode](#setup-mode), the device will reboot and after half a second, the script will run.
 
 ### Setup mode
 
@@ -45,7 +45,7 @@ The easiest way to so is by using a jumper wire between those pins as seen bello
 
 ## Useful links and resources
 
-### Docs 
+### Docs
 
 [CircuitPython](https://circuitpython.readthedocs.io/en/6.3.x/README.html)
 
