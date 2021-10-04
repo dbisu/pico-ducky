@@ -63,9 +63,8 @@ If you need the pico-ducky to not show up as a USB mass storage device for steal
 2. Copy `boot.py` from the folder you cloned / extracted this repository to the root of the pico-ducky.  
 3. Copy your payload script to the pico-ducky.  
 4. Disconnect the pico from your host PC.
-5. Connect a jumper wire between pin 18 and pin 20.
-6. This will prevent the pico-ducky from showing up as a USB drive when plugged into the target computer.  
-7. Remove the jumper wire and reconnect to your PC to reprogram.
+5. Connect a jumper wire between pin 18 and pin 20. This will prevent the pico-ducky from showing up as a USB drive when plugged into the target device.  
+6. Remove the jumper wire and reconnect to your PC to reprogram.
 
 The default mode is USB mass storage enabled.   
 
