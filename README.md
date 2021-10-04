@@ -49,7 +49,7 @@ If you don't have a jumper wire or you want a more convenient way to edit your p
 
 1. Hold the `BOOTSEL` button while plugging your Raspberry Pi Pico to a USB port.
 2. Download the [flash_nuke.uf2](https://datasheets.raspberrypi.org/soft/flash_nuke.uf2) file.
-3. Copy the `flash_nuke.uf2` file to you Raspberry Pi Pico (`RPI-RP2`)
+3. Copy the `flash_nuke.uf2` file to your Raspberry Pi Pico.
 4. Your Raspberry Pi Pico will reboot after half a second and your Raspberry Pi Pico is resetted.
 
 Now you can just repeat steps in [usage](#usage) to setup your pico-ducky.
