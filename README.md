@@ -20,7 +20,7 @@
 
 Install and have your USB Rubber Ducky working in less than 5 minutes.
 
-1. Download the [latest release](https://github.com/cycool29/pico-ducky/releases/download/v1.0/pico-ducky-v1.0.zip) and extract it.
+1. Download the [latest release](https://github.com/dbisu/pico-ducky/releases/download/v1.0/pico-ducky-v1.0.zip) and extract it.
 
 2. Plug your Raspberry Pi Pico into a USB port. It should show up as a mass storage device named `RPI-RP2`.
 
