@@ -20,15 +20,15 @@
 
 Install and have your USB Rubber Ducky working in less than 5 minutes.
 
-1. Clone this repository or [download it as zip](https://github.com/dbisu/pico-ducky/archive/refs/heads/main.zip) and extract it.
+1. Download the [latest release](https://github.com/cycool29/pico-ducky/releases/download/v1.0/pico-ducky-v1.0.zip) and extract it.
 
 2. Plug your Raspberry Pi Pico into a USB port. It should show up as a mass storage device named `RPI-RP2`.
 
-3. Copy the `adafruit-circuitpython-raspberry_pi_pico-en_US-7.0.0.uf2` file from the folder you cloned / extracted this repository to the root of the Pico (`RPI-RP2`). The device will reboot and after a second or so, and reconnect as `CIRCUITPY`, with a `lib` folder, `boot_out.txt` and `code.py` .
+3. Copy the `adafruit-circuitpython-raspberry_pi_pico-en_US-7.0.0.uf2` file from the folder you extracted the zip to the root of the Pico (`RPI-RP2`). The device will reboot and after a second or so, and reconnect as `CIRCUITPY`, with a `lib` folder, `boot_out.txt` and `code.py` .
 
-5. Navigate to the folder you cloned / extracted this repository and copy the `adafruit_hid` folder to the `lib` folder in your Raspberry Pi Pico.
+5. Navigate to the folder you extracted the zip and copy the `adafruit_hid` folder to the `lib` folder in your Raspberry Pi Pico.
 
-6. Delete the `code.py` in your Raspberry Pi Pico, copy `code.py` from the folder you cloned / extracted this repository to your Raspberry Pi Pico.
+6. Delete the `code.py` in your Raspberry Pi Pico, copy `code.py` from the folder you extracted the zip to your Raspberry Pi Pico.
 
 7. Find a script [here](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Payloads) or [create your own one using Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) and save it as `payload.dd` in your Raspberry Pi Pico root.
 
@@ -60,15 +60,37 @@ Now you can just repeat steps in [usage](#usage) to setup your pico-ducky.
 
 If you need the pico-ducky to not show up as a USB mass storage device for stealth, follow these instructions.  
 1. Enter [setup mode](#setup-mode).  
-2. Copy `boot.py` from the folder you cloned / extracted this repository to the root of the pico-ducky.  
-3. Copy your payload script to the pico-ducky.  
-4. Disconnect the pico from your host PC.
-5. Connect a jumper wire between pin 18 and pin 20. This will prevent the pico-ducky from showing up as a USB drive when plugged into the target device.  
-6. Remove the jumper wire and reconnect to your PC to reprogram.
+2. Download [boot.py](https://github.com/dbisu/pico-ducky/raw/main/boot.py).
+3. Copy `boot.py` to the root of the pico-ducky.  
+4. Copy your payload script to the pico-ducky.  
+5. Disconnect the pico from your host PC.
+6. Connect a jumper wire between pin 18 and pin 20. This will prevent the pico-ducky from showing up as a USB drive when plugged into the target device.  
+7. Remove the jumper wire and reconnect to your PC to reprogram.
 
 The default mode is USB mass storage enabled.   
 
 ![USB enable/disable mode](images/usb-boot-mode.png)
+
+
+## Troubleshoot
+
+Read here for some known troubleshooting guides. If the issue still persists, please [open a new issue](https://github.com/dbisu/pico-ducky/issues/new/choose).
+
+- After copy `adafruit-circuitpython-raspberry_pi_pico-en_US-7.0.0.uf2` file to my Raspberry Pi Pico, it reboots but only shows `boot_out.txt`
+
+  - Try [reset](#reset) you Raspberry Pi Pico and download the `adafruit-circuitpython-raspberry_pi_pico-en_US-7.0.0.uf2` file again and repeat the steps.
+  If it still not showing up, you may manually create the `lib` and `code.py`, that won't affect the effect of your pico-ducky.
+  
+- When saving `code.py` or `payload.dd`, system prompt not enough space
+
+  - [Reset](#reset) you Raspberry Pi Pico and repeat the steps again. There may have some hidden files on your Raspberry Pi Pico.
+
+
+- Raspberry Pi Pico won't boot up
+
+  - Try different USB cable. You need a power + data micro-USB cable when using the Raspberry Pi Pico, as this lets the computer and Raspberry Pi Pico 'talk' to each other for programming.
+
+
 
 ## Useful links and resources
 
