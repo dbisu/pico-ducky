@@ -94,7 +94,7 @@ Don't forget to get [the adafruit_hid library](https://github.com/adafruit/Adafr
 
 This is what it should look like **if your language is French for example**.
 
-![CIRCUITPY drive screenshot](docs/drive_pico_ducky.png)
+![CIRCUITPY drive screenshot](https://github.com/Neradoc/Circuitpython_Keyboard_Layouts/raw/main/docs/drive_pico_ducky.png)
 
 #### Modify the pico-ducky code to use your language file:
 
