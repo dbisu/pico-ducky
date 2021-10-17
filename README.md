@@ -101,7 +101,7 @@ This is what it should look like **if your language is French for example**.
 At the start of the file comment out these lines:
 
 ```py
-from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
 from adafruit_hid.keycode import Keycode
 ```
 
