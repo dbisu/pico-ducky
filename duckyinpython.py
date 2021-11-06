@@ -81,6 +81,27 @@ def parseLine(line):
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
 
+def processDuckyScript(duckyScriptPath):
+    f = open(duckyScriptPath,"r",encoding='utf-8')
+    print("Running " + duckyScriptPath)
+    previousLine = ""
+    duckyScript = f.readlines()
+    for line in duckyScript:
+        line = line.rstrip()
+        if(line[0:6] == "REPEAT"):
+            for i in range(int(line[7:])):
+                #repeat the last command
+                parseLine(previousLine)
+                time.sleep(float(defaultDelay)/1000)
+        elif(line[0:6] == "IMPORT"):
+            processDuckyScript(line[7:])
+        else:
+            parseLine(line)
+            previousLine = line
+        time.sleep(float(defaultDelay)/1000)
+
+    print("Done")
+
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayout(kbd)
 
@@ -96,23 +117,6 @@ progStatus = not progStatusPin.value
 defaultDelay = 0
 if(progStatus == False):
     # not in setup mode, inject the payload
-    duckyScriptPath = "payload.dd"
-    f = open(duckyScriptPath,"r",encoding='utf-8')
-    print("Running payload.dd")
-    previousLine = ""
-    duckyScript = f.readlines()
-    for line in duckyScript:
-        line = line.rstrip()
-        if(line[0:6] == "REPEAT"):
-            for i in range(int(line[7:])):
-                #repeat the last command
-                parseLine(previousLine)
-                time.sleep(float(defaultDelay)/1000)
-        else:
-            parseLine(line)
-            previousLine = line
-        time.sleep(float(defaultDelay)/1000)
-
-    print("Done")
+    processDuckyScript("payload.dd")
 else:
     print("Update your payload")
