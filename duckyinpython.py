@@ -77,6 +77,8 @@ def parseLine(line):
         defaultDelay = int(line[14:]) * 10
     elif(line[0:12] == "DEFAULTDELAY"):
         defaultDelay = int(line[13:]) * 10
+    elif(line[0:6] == "IMPORT"):
+        processDuckyScript(line[7:])
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
@@ -93,8 +95,6 @@ def processDuckyScript(duckyScriptPath):
                 #repeat the last command
                 parseLine(previousLine)
                 time.sleep(float(defaultDelay)/1000)
-        elif(line[0:6] == "IMPORT"):
-            processDuckyScript(line[7:])
         else:
             parseLine(line)
             previousLine = line
