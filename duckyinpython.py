@@ -66,6 +66,7 @@ def sendString(line):
     layout.write(line)
 
 def parseLine(line):
+    global defaultDelay
     if(line[0:3] == "REM"):
         # ignore ducky script comments
         pass
