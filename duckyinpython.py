@@ -37,6 +37,20 @@ duckyCommands = {
     'F12': Keycode.F12,
 }
 
+def loadLocale(locale):
+    global KeyboardLayout, Keycode, layout
+    if(locale.lower() == "us"):
+        moduleKeyboardLayout = __import__("adafruit_hid.keyboard_layout_us", globals(), locals(), ["KeyboardLayoutUS"])
+        moduleKeycode = __import__("adafruit_hid.keycode", globals(), locals(), ["Keycode"])
+        KeyboardLayout = moduleKeyboardLayout.KeyboardLayoutUS
+        Keycode = moduleKeycode.Keycode
+    else:
+        moduleKeyboardLayout = __import__("keyboard_layout_win_" + locale.lower(), globals(), locals(), ["KeyboardLayout"])
+        moduleKeycode = __import__("keycode_win_" + locale.lower(), globals(), locals(), ["Keycode"])
+        KeyboardLayout = moduleKeyboardLayout.KeyboardLayout
+        Keycode = moduleKeycode.Keycode
+    layout = KeyboardLayout(kbd)
+
 def convertLine(line):
     newline = []
     print(line)
@@ -78,6 +92,8 @@ def parseLine(line):
         defaultDelay = int(line[14:]) * 10
     elif(line[0:12] == "DEFAULTDELAY"):
         defaultDelay = int(line[13:]) * 10
+    elif(line[0:6] == "LOCALE"):
+        loadLocale(line[7:])
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
