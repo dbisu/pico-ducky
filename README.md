@@ -22,7 +22,7 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 1. Download [CircuitPython for the Raspberry Pi Pico](https://circuitpython.org/board/raspberry_pi_pico/). *Updated to 7.0.0
 
-2. Plug the device into a USB port. It will show up as a removable media device named `RPI-RP2`.
+2. Plug the device into a USB port while holding the boot button. It will show up as a removable media device named `RPI-RP2`.
 
 3. Copy the downloaded `.uf2` file to the root of the Pico (`RPI-RP2`). The device will reboot and after a second or so, it will reconnect as `CIRCUITPY`.
 
