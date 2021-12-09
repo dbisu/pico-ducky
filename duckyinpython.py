@@ -2,7 +2,6 @@
 # copyright (c) 2021  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
 
-
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
 
@@ -18,6 +17,8 @@ from adafruit_hid.keycode import Keycode
 import time
 import digitalio
 from board import *
+led = digitalio.DigitalInOut(LED)
+led.direction = digitalio.Direction.OUTPUT
 
 duckyCommands = {
     'WINDOWS': Keycode.WINDOWS, 'GUI': Keycode.GUI,
@@ -31,6 +32,7 @@ duckyCommands = {
     'INSERT': Keycode.INSERT, 'NUMLOCK': Keycode.KEYPAD_NUMLOCK, 'PAGEUP': Keycode.PAGE_UP,
     'PAGEDOWN': Keycode.PAGE_DOWN, 'PRINTSCREEN': Keycode.PRINT_SCREEN, 'ENTER': Keycode.ENTER,
     'SCROLLLOCK': Keycode.SCROLL_LOCK, 'SPACE': Keycode.SPACE, 'TAB': Keycode.TAB,
+    'BAKCKSPACE': Keycode.BACKSPACE, 'DELETE': Keycode.DELETE, 
     'A': Keycode.A, 'B': Keycode.B, 'C': Keycode.C, 'D': Keycode.D, 'E': Keycode.E,
     'F': Keycode.F, 'G': Keycode.G, 'H': Keycode.H, 'I': Keycode.I, 'J': Keycode.J,
     'K': Keycode.K, 'L': Keycode.L, 'M': Keycode.M, 'N': Keycode.N, 'O': Keycode.O,
@@ -40,11 +42,11 @@ duckyCommands = {
     'F4': Keycode.F4, 'F5': Keycode.F5, 'F6': Keycode.F6, 'F7': Keycode.F7,
     'F8': Keycode.F8, 'F9': Keycode.F9, 'F10': Keycode.F10, 'F11': Keycode.F11,
     'F12': Keycode.F12,
-}
 
+}
 def convertLine(line):
     newline = []
-    print(line)
+    # print(line)
     # loop on each key - the filter removes empty values
     for key in filter(None, line.split(" ")):
         key = key.upper()
@@ -59,7 +61,7 @@ def convertLine(line):
         else:
             # if it's not a known key name, show the error for diagnosis
             print(f"Unknown key: <{key}>")
-    print(newline)
+    # print(newline)
     return newline
 
 def runScriptLine(line):
@@ -79,10 +81,19 @@ def parseLine(line):
         time.sleep(float(line[6:])/1000)
     elif(line[0:6] == "STRING"):
         sendString(line[7:])
+    elif(line[0:5] == "PRINT"):
+        print("[SCRIPT]: " + line[6:])
+    elif(line[0:6] == "IMPORT"):
+        runScript(line[7:])
     elif(line[0:13] == "DEFAULT_DELAY"):
         defaultDelay = int(line[14:]) * 10
     elif(line[0:12] == "DEFAULTDELAY"):
         defaultDelay = int(line[13:]) * 10
+    elif(line[0:3] == "LED"):
+        if(led.value == True):
+            led.value = False
+        else:
+            led.value = True
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
@@ -100,11 +111,12 @@ progStatusPin = digitalio.DigitalInOut(GP0)
 progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
 progStatus = not progStatusPin.value
 defaultDelay = 0
-if(progStatus == False):
-    # not in setup mode, inject the payload
-    duckyScriptPath = "payload.dd"
+
+def runScript(file):
+    global defaultDelay
+    
+    duckyScriptPath = file
     f = open(duckyScriptPath,"r",encoding='utf-8')
-    print("Running payload.dd")
     previousLine = ""
     duckyScript = f.readlines()
     for line in duckyScript:
@@ -118,6 +130,11 @@ if(progStatus == False):
             parseLine(line)
             previousLine = line
         time.sleep(float(defaultDelay)/1000)
+
+if(progStatus == False):
+    # not in setup mode, inject the payload
+    print("Running payload.dd")
+    runScript("payload.dd")
 
     print("Done")
 else:
