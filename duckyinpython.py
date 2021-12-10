@@ -2,6 +2,9 @@
 # copyright (c) 2021  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
 
+# Modified by Houston
+# Modification license: The Unlicense
+
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
 
@@ -17,6 +20,7 @@ from adafruit_hid.keycode import Keycode
 import time
 import digitalio
 from board import *
+import storage
 led = digitalio.DigitalInOut(LED)
 led.direction = digitalio.Direction.OUTPUT
 
@@ -32,7 +36,7 @@ duckyCommands = {
     'INSERT': Keycode.INSERT, 'NUMLOCK': Keycode.KEYPAD_NUMLOCK, 'PAGEUP': Keycode.PAGE_UP,
     'PAGEDOWN': Keycode.PAGE_DOWN, 'PRINTSCREEN': Keycode.PRINT_SCREEN, 'ENTER': Keycode.ENTER,
     'SCROLLLOCK': Keycode.SCROLL_LOCK, 'SPACE': Keycode.SPACE, 'TAB': Keycode.TAB,
-    'BAKCKSPACE': Keycode.BACKSPACE, 'DELETE': Keycode.DELETE, 
+    'BAKCKSPACE': Keycode.BACKSPACE, 'DELETE': Keycode.DELETE,
     'A': Keycode.A, 'B': Keycode.B, 'C': Keycode.C, 'D': Keycode.D, 'E': Keycode.E,
     'F': Keycode.F, 'G': Keycode.G, 'H': Keycode.H, 'I': Keycode.I, 'J': Keycode.J,
     'K': Keycode.K, 'L': Keycode.L, 'M': Keycode.M, 'N': Keycode.N, 'O': Keycode.O,
@@ -44,6 +48,8 @@ duckyCommands = {
     'F12': Keycode.F12,
 
 }
+defaultDelay = 0
+
 def convertLine(line):
     newline = []
     # print(line)
@@ -75,7 +81,6 @@ def sendString(line):
 def parseLine(line):
     global defaultDelay
     if(line[0:3] == "REM"):
-        # ignore ducky script comments
         pass
     elif(line[0:5] == "DELAY"):
         time.sleep(float(line[6:])/1000)
@@ -101,20 +106,11 @@ def parseLine(line):
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayout(kbd)
 
-# sleep at the start to allow the device to be recognized by the host computer
 time.sleep(.5)
-
-# check GP0 for setup mode
-# see setup mode for instructions
-progStatus = False
-progStatusPin = digitalio.DigitalInOut(GP0)
-progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
-progStatus = not progStatusPin.value
-defaultDelay = 0
 
 def runScript(file):
     global defaultDelay
-    
+
     duckyScriptPath = file
     f = open(duckyScriptPath,"r",encoding='utf-8')
     previousLine = ""
@@ -131,11 +127,16 @@ def runScript(file):
             previousLine = line
         time.sleep(float(defaultDelay)/1000)
 
-if(progStatus == False):
-    # not in setup mode, inject the payload
+noStorageStatus = False
+noStoragePin = digitalio.DigitalInOut(GP15)
+noStoragePin.switch_to_input(pull=digitalio.Pull.UP)
+
+if(noStoragePin.value == True):
     print("Running payload.dd")
-    runScript("payload.dd")
+    runScript("scripts/payload.dd")
 
     print("Done")
 else:
     print("Update your payload")
+    led.value = True
+    time.sleep(9999999999999999)
