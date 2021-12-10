@@ -2,9 +2,6 @@
 # copyright (c) 2021  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
 
-# Modified by Houston
-# Modification license: The Unlicense
-
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
 
