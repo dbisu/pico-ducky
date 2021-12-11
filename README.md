@@ -18,7 +18,9 @@
 
 <br />
 
-This is a port of the Pico-Ducky project by Dave Bailey (dbisu, @daveisu), converted to run on the S2 Wi-Fi Nugget (https://retia.io/products/wi-fi-nugget-s2-nugget-esp32s2).
+This is a port of the Pico-Ducky project by Dave Bailey (dbisu, @daveisu), converted to run on the S2 Wi-Fi Nugget
+
+You can buy one here: (https://retia.io/products/wi-fi-nugget-s2-nugget-esp32s2).
 
 
 ## Major changes:
