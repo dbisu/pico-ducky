@@ -54,32 +54,27 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 8. Be careful, if your device isn't in [setup mode](#setup-mode), the device will reboot and after half a second, the script will run.
 
-### Setup mode
+### Attack mode
 
-To edit the payload, enter setup mode by connecting the pin 1 (`GP0`) to pin 3 (`GND`), this will stop the pico-ducky from injecting the payload in your own machine.
-The easiest way to so is by using a jumper wire between those pins as seen bellow.
+To edit a payload, setup mode is entered automatically when inserted. You can deploy a payload at any time by pressing one of the 4 payload buttons.
 
-![Setup mode with a jumper](images/setup-mode.png)
+If you want to inject a script with maximum speed, hold the RIGHT button down when inserting your S2 Nugget into the target computer. 
+
+This will cause payload1.dd to be automatically injected as soon as the S2 Nugget is powered up.
 
 ### USB enable/disable mode
 
-If you need the pico-ducky to not show up as a USB mass storage device for stealth, follow these instructions.  
-Enter setup mode.  
-Copy boot.py to the root of the pico-ducky.  
-Copy your payload script to the pico-ducky.  
-Disconnect the pico from your host PC.
-Connect a jumper wire between pin 18 and pin 20.
-This will prevent the pico-ducky from showing up as a USB drive when plugged into the target computer.  
-Remove the jumper and reconnect to your PC to reprogram.
-The default mode is USB mass storage enabled.   
+If you need the S2 Nugget to not show up as a USB mass storage device for stealth, follow these instructions:
 
-![USB enable/disable mode](images/usb-boot-mode.png)
+Hold the DOWN button when plugging in your S2 Nugget. It should load the menu and inject payloads, but not appear as a USB device.
+
+Reset the board without holding down the button to make the device appear as a USB drive again.
 
 ### Changing Keyboard Layouts
 
 Copied from [Neradoc/Circuitpython_Keyboard_Layouts](https://github.com/Neradoc/Circuitpython_Keyboard_Layouts/blob/main/PICODUCKY.md)  
 
-#### How to use one of these layouts with the pico-ducky repository.
+#### How to use one of these layouts with the RubberNugget repository.
 
 **Go to the [latest release page](https://github.com/Neradoc/Circuitpython_Keyboard_Layouts/releases/latest), look if your language is in the list.**
 
@@ -87,7 +82,7 @@ Copied from [Neradoc/Circuitpython_Keyboard_Layouts](https://github.com/Neradoc/
 
 Download the `py` zip, named `circuitpython-keyboard-layouts-py-XXXXXXXX.zip`
 
-**NOTE: You can use the mpy version targetting the version of Circuitpython that is on the device, but on Raspberry Pi Pico you don't need it - they only reduce file size and memory use on load, which the pico has plenty of.**
+**NOTE: You can use the mpy version targetting the version of Circuitpython that is on the device, but on the S2 Nugget you don't need it - they only reduce file size and memory use on load, which the pico has plenty of.**
 
 #### If your language/layout is not in the bundle
 
@@ -114,7 +109,7 @@ This is what it should look like **if your language is French for example**.
 
 ![CIRCUITPY drive screenshot](https://github.com/Neradoc/Circuitpython_Keyboard_Layouts/raw/main/docs/drive_pico_ducky.png)
 
-#### Modify the pico-ducky code to use your language file:
+#### Modify the RubberNugget code to use your language file:
 
 At the start of the file comment out these lines:
 
