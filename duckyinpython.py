@@ -144,6 +144,21 @@ duckyScriptPath = ["payload1.dd", "payload2.dd", "payload3.dd", "payload4.dd"]
 time.sleep(.5)
 defaultDelay = 0
 
+progStatus = False
+progStatusPin = buttons[3]
+progStatus = not progStatusPin.value
+defaultDelay = 0
+
+print(progStatus)
+
+if(progStatus == True):
+    # not in setup mode, inject the payload
+    print("Attack Mode: Running payload.dd")
+    injectPayload(0)
+    print("Done")
+else:
+    print("Entering menu")
+    
 while True:
     for i in range(len(buttons)):
         buttons[i].update()
@@ -153,3 +168,4 @@ while True:
             injectPayload(i)
         if buttons[i].rose:
             print("button",i,"released!")
+
