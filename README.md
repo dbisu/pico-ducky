@@ -4,11 +4,10 @@
   <strong>Deploy up to 4 different Duckyscript payloads with an S2 Wi-Fi Nugget</strong>
   
 </div>
+<br />
 <p align="center">
   <img src="images/s2.png" alt="S2 Nugget" title="S2 Nugget" width="500"/>
 </p>
-<br />
-
 <div align="center">
   <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/dbisu/pico-ducky">
   <img alt="GitHub license" src="https://img.shields.io/github/license/dbisu/pico-ducky">
