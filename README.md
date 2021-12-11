@@ -1,7 +1,7 @@
 <h1 align="center">Rubber-Nugget</h1>
 
 <div align="center">
-  <strong>Make an evil USB Keyboard to deploy 4 different Duckyscript payloads with an S2 Wi-Fi Nugget</strong>
+  <strong>Deploy up to 4 different Duckyscript payloads with an S2 Wi-Fi Nugget</strong>
   
 </div>
 <p align="center">
