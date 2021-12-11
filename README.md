@@ -1,7 +1,7 @@
-<h1 align="center">pico-ducky</h1>
+<h1 align="center">Rubber-Nugget</h1>
 
 <div align="center">
-  <strong>Make a cheap but powerful USB Rubber Ducky with a Raspberry Pi Pico</strong>
+  <strong>Use an S2 Wi-Fi Nugget to make an evil USB Keyboard Device loaded with 4 different Duckyscript payloads</strong>
 </div>
 
 <br />
@@ -20,15 +20,15 @@
 
 Install and have your USB Rubber Ducky working in less than 5 minutes.
 
-1. Download [CircuitPython for the Raspberry Pi Pico](https://circuitpython.org/board/raspberry_pi_pico/). *Updated to 7.0.0
+1. Download [CircuitPython for the S2 Mini](https://circuitpython.org/board/lolin_s2_mini/). *Updated to 7.0.0
 
-2. Plug the device into a USB port while holding the boot button. It will show up as a removable media device named `RPI-RP2`.
+2. Plug the device into a USB port while holding the RESET button, click the 0 button, then release the RESET button. It will show up as a removable media device named `S2Boot`.
 
-3. Copy the downloaded `.uf2` file to the root of the Pico (`RPI-RP2`). The device will reboot and after a second or so, it will reconnect as `CIRCUITPY`.
+3. Copy the downloaded `.uf2` file to the root of the S2 Mini (`S2Boot`). The device will reboot and after a second or so, it will reconnect as `CIRCUITPY`.
 
 4. Download `adafruit-circuitpython-bundle-7.x-mpy-YYYYMMDD.zip` [here](https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/latest) and extract it outside the device.
 
-5. Navigate to `lib` in the recently extracted folder and copy `adafruit_hid` to the `lib` folder in your Raspberry Pi Pico.
+5. Navigate to `lib` in the recently extracted folder and copy `adafruit_hid` to the `lib` folder on your S2 Nugget.
 
 6. Click [here](https://raw.githubusercontent.com/dbisu/pico-ducky/main/duckyinpython.py), press CTRL + S and save the file as `code.py` in the root of the Raspberry Pi Pico, overwriting the previous file.
 
