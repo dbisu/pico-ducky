@@ -18,6 +18,8 @@
 
 This is a port of the Pico-Ducky project by Dave Bailey (dbisu, @daveisu), converted to run on the S2 Wi-Fi Nugget (https://retia.io/products/wi-fi-nugget-s2-nugget-esp32s2).
 
+![S2 Nugget](https://github.com/HakCat-Tech/S2-Nugget/blob/main/nug1.png?raw=true)
+
 Major changes:
 To hide the USB drive, hold the DOWN button on the S2 Nugget and release when the menu face appears.
 Once the menu face appears, you can run any one of 4 duckyscript payloads: 
