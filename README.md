@@ -3,7 +3,9 @@
 <div align="center">
   <strong>Use an S2 Wi-Fi Nugget to make an evil USB Keyboard Device loaded with 4 different Duckyscript payloads</strong>
 </div>
-<img src="images/s2.png" alt="S2 Nugget" title="S2 Nugget" width="500"/>
+<p align="center">
+  <img src="images/s2.png" alt="S2 Nugget" title="S2 Nugget" width="500"/>
+</p>
 <br />
 
 <div align="center">
