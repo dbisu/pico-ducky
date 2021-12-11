@@ -3,7 +3,7 @@
 <div align="center">
   <strong>Use an S2 Wi-Fi Nugget to make an evil USB Keyboard Device loaded with 4 different Duckyscript payloads</strong>
 </div>
-
+<img src="images/s2.png" alt="S2 Nugget" title="S2 Nugget" width="500"/>
 <br />
 
 <div align="center">
@@ -18,7 +18,6 @@
 
 This is a port of the Pico-Ducky project by Dave Bailey (dbisu, @daveisu), converted to run on the S2 Wi-Fi Nugget (https://retia.io/products/wi-fi-nugget-s2-nugget-esp32s2).
 
-<img src="images/s2.png" alt="S2 Nugget" title="S2 Nugget" width="500"/>
 
 Major changes:
 To hide the USB drive, hold the DOWN button on the S2 Nugget and release when the menu face appears.
