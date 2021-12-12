@@ -51,9 +51,9 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 5. Navigate to `lib` in the recently extracted folder and copy `adafruit_hid` to the `lib` folder on your S2 Nugget.
 
-6. Click [here](https://raw.githubusercontent.com/dbisu/pico-ducky/main/duckyinpython.py), press CTRL + S and save the file as `code.py` in the root of the Raspberry Pi Pico, overwriting the previous file.
+6. Click [here](https://raw.githubusercontent.com/HakCat-Tech/RubberNugget/main/duckyinpython.py), press CTRL + S and save the file as `code.py` in the root of the S2 Nugget, overwriting the previous file.
 
-7. Find a script [here](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Payloads) or [create your own one using Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) and save it as `payload.dd` in the Pico.
+7. Find a script [here](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Payloads) or [create your own one using Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) and save it as `payload.dd` in the S2 Nugget.
 
 8. Be careful, if your device isn't in [setup mode](#setup-mode), the device will reboot and after half a second, the script will run.
 
@@ -85,7 +85,7 @@ Copied from [Neradoc/Circuitpython_Keyboard_Layouts](https://github.com/Neradoc/
 
 Download the `py` zip, named `circuitpython-keyboard-layouts-py-XXXXXXXX.zip`
 
-**NOTE: You can use the mpy version targetting the version of Circuitpython that is on the device, but on the S2 Nugget you don't need it - they only reduce file size and memory use on load, which the pico has plenty of.**
+**NOTE: You can use the mpy version targetting the version of Circuitpython that is on the device, but on the S2 Nugget you don't need it - they only reduce file size and memory use on load, which the S2 Nugget has plenty of.**
 
 #### If your language/layout is not in the bundle
 
