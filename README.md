@@ -43,9 +43,9 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 1. Download [CircuitPython for the S2 Mini](https://circuitpython.org/board/lolin_s2_mini/). *Updated to 7.0.0
 
-2. Plug the device into a USB port while holding the RESET button, click the 0 button, then release the RESET button. It will show up as a removable media device named `S2Boot`.
+2. Plug the device into a USB port while holding the RESET button, click the 0 button, then release the RESET button. It will show up as a removable media device named `S2MINIBOOT`.
 
-3. Copy the downloaded `.uf2` file to the root of the S2 Mini (`S2Boot`). The device will reboot and after a second or so, it will reconnect as `CIRCUITPY`.
+3. Copy the downloaded `.uf2` file to the root of the S2 Mini (`S2MINIBOOT`). The device will reboot and after a second or so, it will reconnect as `CIRCUITPY`.
 
 4. Download `adafruit-circuitpython-bundle-7.x-mpy-YYYYMMDD.zip` [here](https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/latest) and extract it outside the device.
 
