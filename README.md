@@ -47,15 +47,13 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 3. Copy the downloaded `.uf2` file to the root of the S2 Mini (`S2MINIBOOT`). The device will reboot and after a second or so, it will reconnect as `CIRCUITPY`.
 
-4. Download `adafruit-circuitpython-bundle-7.x-mpy-YYYYMMDD.zip` [here](https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/latest) and extract it outside the device.
+4. Download and extract the .ZIP file for this project on your computer.
 
-5. Navigate to `lib` in the recently extracted folder and copy `adafruit_hid` to the `lib` folder on your S2 Nugget.
+5. Copy the following files and folders to your Nugget: `code.py`, `boot.py`, `lib`, `faces`, `payload1.dd`, `payload2.dd`, `payload3.dd`, `payload4.dd` 
 
-6. Click [here](https://raw.githubusercontent.com/HakCat-Tech/RubberNugget/main/duckyinpython.py), press CTRL + S and save the file as `code.py` in the root of the S2 Nugget, overwriting the previous file.
+6. Find a script [here](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Payloads) or [create your own one using Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) and save it as `payload1.dd` in the S2 Nugget. You can add to 4 payloads the same way, adding a number to each payload file name.
 
-7. Find a script [here](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Payloads) or [create your own one using Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) and save it as `payload.dd` in the S2 Nugget.
-
-8. Be careful, if your device isn't in [setup mode](#setup-mode), the device will reboot and after half a second, the script will run.
+7. If you want device to load in stealth mode, hold the down button when plugging in your Nugget to prevent the USB drive from appearing.
 
 ### Attack mode
 
