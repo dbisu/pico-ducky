@@ -6,7 +6,7 @@
 </div>
 <br />
 <p align="center">
-  <img src="images/s2.png" alt="S2 Nugget" title="S2 Nugget" width="500"/>
+  <img src="https://cdn.shopify.com/s/files/1/2779/8142/products/S2-Nugget_1024x1024.png" alt="S2 Nugget" title="S2 Nugget" width="500"/>
 </p>
 <div align="center">
   <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/dbisu/pico-ducky">
