@@ -1,7 +1,7 @@
 <h1 align="center">Rubber-Nugget</h1>
 
 <div align="center">
-  <strong>Deploy up to 4 different Duckyscript payloads with an S2 Wi-Fi Nugget</strong>
+  <strong>Deploy up to 5 different Duckyscript payloads with an S2 Wi-Fi Nugget</strong>
   
 </div>
 <br />
@@ -27,7 +27,7 @@ You can buy one here: (https://retia.io/products/wi-fi-nugget-s2-nugget-esp32s2)
 
 To hide the USB drive, hold the DOWN button when plugging in the S2 Nugget and release when the menu face appears.
 
-To auto-inject payload 1, hold the RIGHT button when plugging in the S2 Nugget.
+To auto-inject payload.dd, hold the RIGHT button when plugging in the S2 Nugget.
 
 Once the menu face appears, you can run any one of 4 duckyscript payloads: 
 *  press the UP button to run payload1.dd
@@ -49,7 +49,7 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 4. Download and extract the .ZIP file for this project on your computer.
 
-5. Copy the following files and folders to your Nugget: `code.py`, `boot.py`, `lib`, `faces`, `payload1.dd`, `payload2.dd`, `payload3.dd`, `payload4.dd` 
+5. Copy the following files and folders to your Nugget: `code.py`, `boot.py`, `lib`, `faces`, `payload.dd`, `payload1.dd`, `payload2.dd`, `payload3.dd`, `payload4.dd` 
 
 6. Find a script [here](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Payloads) or [create your own one using Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) and save it as `payload1.dd` in the S2 Nugget. You can add to 4 payloads the same way, adding a number to each payload file name.
 
