@@ -39,7 +39,7 @@ To add new payloads, replace the payload.dd files on the CircuitPython drive.
 
 ## Install
 
-Install and have your USB Rubber Ducky working in less than 5 minutes.
+Install and have your USB Rubber Nugget working in less than 5 minutes.
 
 1. Download [CircuitPython for the S2 Mini](https://circuitpython.org/board/lolin_s2_mini/). *Updated to 7.0.0
 
