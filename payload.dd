@@ -1,6 +1,9 @@
-REM The next four lines open Notepad in Windows and type "Hello World!"
-GUI r
-STRING notepad
+DELAY 300
+GUI ENTER
+DELAY 200
+STRING GET RICKROLLED!!!!
+STRING firefox https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ENTER
-DELAY 250
-STRING Hello World!
+DELAY 1000
+SPACE
+DELAY 30001

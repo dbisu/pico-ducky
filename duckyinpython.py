@@ -192,7 +192,6 @@ if(not progStatus):
     # not in setup mode, inject the payload
     print("Running payload.dd")
     runScript("payload.dd")
-
     print("Done")
 else:
     print("Update your payload")
