@@ -3,8 +3,6 @@
 # Author: Dave Bailey (dbisu, @daveisu)
 
 import time
-from ast import match_case
-from typing import List
 
 import digitalio
 import usb_hid
@@ -104,11 +102,11 @@ duckyCommands = {
 }
 
 
-def convertLine(line: str)-> List:
+def convertLine(line: str):
     newline = []
     # print(line)
     # loop on each key - the filter removes empty values
-    for key in filter(None, line.split(" ")):
+    for key in filter(None, line.strip().split(" ")):
         key = key.upper()
         # find the keycode for the command in the list
         if key in duckyCommands:
@@ -134,26 +132,26 @@ def sendString(line: str) -> None:
     layout.write(line)
 
 
-def splitIntoCommandAndArg(line: str) -> List[str]:
+def splitIntoCommandAndArg(line: str):
     return line.strip().split(" ", 1)
 
 
 def parseLine(line: str) -> None:
     global defaultDelay
-    cmd, arg = splitIntoCommandAndArg(line)
+    cmd, *args = splitIntoCommandAndArg(line)
     if(cmd == "REM"):
         # ignore ducky script comments
         pass
     elif(cmd == "DELAY"):
-        time.sleep(float(arg/1000))
+        time.sleep(float(args[0])/1000)
     elif(cmd == "STRING"):
-        sendString(arg)
+        sendString(args[0])
     elif(cmd == "PRINT"):
-        print("[SCRIPT]: " + arg)
+        print("[SCRIPT]: " + args[0])
     elif(cmd == "IMPORT"):
-        runScript(arg)
+        runScript(args[0])
     elif(cmd == "DEFAULT_DELAY" or cmd == "DEFAULTDELAY"):
-        defaultDelay = int(arg) * 10
+        defaultDelay = int(args[0]) * 10
     elif(cmd == "LED"):
         led.value = not led.value
     else:
@@ -167,9 +165,9 @@ def runScript(file: str) -> None:
     with open(file, "r", encoding='utf-8') as f:
         duckyScript = f.readlines()
         for previousLine, currentLine in zip(duckyScript, duckyScript[1:]):
-            currentCmd, currentArg = splitIntoCommandAndArg(currentLine)
+            currentCmd, *currentArgs = splitIntoCommandAndArg(currentLine)
             if(currentCmd == "REPEAT"):
-                for _ in range(int(currentArg)):
+                for _ in range(int(currentArgs[0])):
                     # repeat the last command
                     parseLine(previousLine)
                     time.sleep(float(defaultDelay)/1000)
@@ -190,7 +188,7 @@ progStatus = not progStatusPin.value
 defaultDelay = 0
 
 
-if(progStatus == False):
+if(not progStatus):
     # not in setup mode, inject the payload
     print("Running payload.dd")
     runScript("payload.dd")
