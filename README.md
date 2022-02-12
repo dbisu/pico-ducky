@@ -86,7 +86,6 @@ For a language `LANG`, copy the following files from the zip's `lib` folder to t
 **DO NOT** change the names or extensions of the files. Just pick the right ones.  
 Replace `LANG` with the letters for your language of choice.
 
-- `keyboard_layout.py`
 - `keyboard_layout_win_LANG.py`
 - `keycode_win_LANG.py`
 
