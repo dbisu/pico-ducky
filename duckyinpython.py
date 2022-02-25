@@ -104,12 +104,16 @@ layout = KeyboardLayout(kbd)
 # sleep at the start to allow the device to be recognized by the host computer
 time.sleep(.5)
 
-# check GP0 for setup mode
-# see setup mode for instructions
-progStatus = False
-progStatusPin = digitalio.DigitalInOut(GP0)
-progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
-progStatus = not progStatusPin.value
+
+def getProgrammingStatus():
+    # check GP0 for setup mode
+    # see setup mode for instructions
+    progStatusPin = digitalio.DigitalInOut(GP0)
+    progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
+    progStatus = not progStatusPin.value
+    return(progStatus)
+
+
 defaultDelay = 0
 
 def runScript(file):
@@ -131,10 +135,55 @@ def runScript(file):
             previousLine = line
         time.sleep(float(defaultDelay)/1000)
 
+def selectPayload():
+    payload = "payload.dd"
+    # check switch status
+    # payload1 = GPIO4 to GND
+    # payload2 = GPIO5 to GND
+    # payload3 = GPIO10 to GND
+    # payload4 = GPIO11 to GND
+    payload1Pin = digitalio.DigitalInOut(GP4)
+    payload1Pin.switch_to_input(pull=digitalio.Pull.UP)
+    payload1State = not payload1Pin.value
+    payload2Pin = digitalio.DigitalInOut(GP5)
+    payload2Pin.switch_to_input(pull=digitalio.Pull.UP)
+    payload2State = not payload2Pin.value
+    payload3Pin = digitalio.DigitalInOut(GP10)
+    payload3Pin.switch_to_input(pull=digitalio.Pull.UP)
+    payload3State = not payload3Pin.value
+    payload4Pin = digitalio.DigitalInOut(GP11)
+    payload4Pin.switch_to_input(pull=digitalio.Pull.UP)
+    payload4State = not payload4Pin.value
+
+
+    if(payload1State == True):
+        payload = "payload.dd"
+
+    elif(payload2State == True):
+        payload = "payload2.dd"
+
+    elif(payload3State == True):
+        payload = "payload3.dd"
+
+    elif(payload4State == True):
+        payload = "payload4.dd"
+
+    else:
+        # if all pins are high, then no switch is present
+        # default to payload1
+        payload = "payload.dd"
+
+
+    return payload
+
+progStatus = False
+progStatus = getProgrammingStatus()
+
 if(progStatus == False):
     # not in setup mode, inject the payload
-    print("Running payload.dd")
-    runScript("payload.dd")
+    payload = selectPayload()
+    print("Running ", payload)
+    runScript(payload)
 
     print("Done")
 else:
