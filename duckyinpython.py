@@ -122,9 +122,11 @@ def runScript(file):
     duckyScriptPath = file
     f = open(duckyScriptPath,"r",encoding='utf-8')
     previousLine = ""
-    duckyScript = f.readlines()
-    for line in duckyScript:
-        line = line.rstrip()
+    while 1:
+        line = f.readline().replace("\n","").replace("\r","")
+        if line == "":
+            break
+        print(line)
         if(line[0:6] == "REPEAT"):
             for i in range(int(line[7:])):
                 #repeat the last command
