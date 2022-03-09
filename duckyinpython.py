@@ -126,7 +126,6 @@ def runScript(file):
         line = f.readline().replace("\n","").replace("\r","")
         if line == "":
             break
-        print(line)
         if(line[0:6] == "REPEAT"):
             for i in range(int(line[7:])):
                 #repeat the last command
