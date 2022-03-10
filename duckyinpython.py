@@ -124,8 +124,6 @@ def runScript(file):
     previousLine = ""
     for line in f:
         line = line.rstrip()
-        if line == "":
-            break
         if(line[0:6] == "REPEAT"):
             for i in range(int(line[7:])):
                 #repeat the last command
