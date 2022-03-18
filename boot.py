@@ -1,6 +1,10 @@
 from board import *
 import digitalio
 import storage
+import usb_hid
+
+usb_hid.disable()
+usb_hid.enable((usb_hid.Device.KEYBOARD,))
 
 noStorageStatus = False
 noStoragePin = digitalio.DigitalInOut(GP15)
