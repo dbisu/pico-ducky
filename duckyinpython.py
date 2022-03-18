@@ -14,6 +14,8 @@ from adafruit_hid.keycode import Keycode
 #from keyboard_layout_win_LANG import KeyboardLayout
 #from keycode_win_LANG import Keycode
 
+import supervisor
+
 import time
 import digitalio
 from board import *
@@ -101,8 +103,13 @@ def parseLine(line):
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayout(kbd)
 
+# turn off automatically reloading when files are written to the pico
+supervisor.disable_autoreload()
+
 # sleep at the start to allow the device to be recognized by the host computer
 time.sleep(.5)
+
+led.value = True
 
 
 def getProgrammingStatus():
@@ -187,3 +194,9 @@ if(progStatus == False):
     print("Done")
 else:
     print("Update your payload")
+
+while True:
+    time.sleep(1.0)
+    led.value = False
+    time.sleep(1.0)
+    led.value = True
