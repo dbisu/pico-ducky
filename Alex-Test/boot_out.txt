@@ -1,0 +1,4 @@
+Adafruit CircuitPython 7.2.3 on 2022-03-16; S2Mini with ESP32S2-S2FN4R2
+Board ID:lolin_s2_mini
+boot.py output:
+USB drive enabled

