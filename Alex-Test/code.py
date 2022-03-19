@@ -239,6 +239,13 @@ def runPayload(payloadPath):
     drawPayload("STOP",payloadPath)
     time.sleep(.5)
 
+# create default directories
+
+default_os = ["Windows","Starred","Mac","Linux"]
+for os_name in default_os:
+    if (os_name not in(os.listdir("payloads"))):
+    	os.mkdir(os_name)  	
+        
 while True:
     # check for root payload directory
     if (path!="payloads"):
