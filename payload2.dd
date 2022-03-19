@@ -1,9 +1,0 @@
-REM Quick Rickroller, opens Rickroll video on MacOS via Terminal and plays by @Skickar 2022
-GUI SPACE
-STRING terminal.app
-ENTER
-DELAY 1000
-STRING open "https://youtu.be/dQw4w9WgXcQ"
-ENTER
-DELAY 2000
-SPACE
