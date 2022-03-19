@@ -1,8 +1,0 @@
-REM This is the "Rush" Payload, it asks if you want to extend your car's warranty on MacOS (taken from voicemail transcript) by @skicka
-GUI SPACE
-DELAY 500
-STRING terminal.app
-ENTER
-DELAY 1000
-STRING say "Hi, this is Melanie and I'm giving you a call from the dealer service center. We recently noticed your car's extended warranty would expire and wanted to provide you with one final courtesy call before your warranty expires, June 10th, your warranty coverage becomes voided. This would make you financially responsible for all Service Repairs. If you wish to extend or reinstate your car's warranty, press for now, or press 9 to be continued coverage and discontinue receiving these reminders." && kill -9 $(ps -p $PPID -o ppid=)
-ENTER
