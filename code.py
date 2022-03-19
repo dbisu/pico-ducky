@@ -2,7 +2,7 @@
 # copyright (c) 2021  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
 # Nugget Fork: Kody Kinzie @skickar
-# Now It Runs One Of 4 Payloads!
+# Now It Runs One Of 5 Payloads!
 
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
@@ -119,7 +119,7 @@ def parseLine(line):
 
 def injectPayload(payloadNumber):
     f = open(duckyScriptPath[payloadNumber],"r",encoding='utf-8')
-    print("Running payload.dd")
+    print("Running payload.txt")
     previousLine = ""
     duckyScript = f.readlines()
     for line in duckyScript:
@@ -138,7 +138,7 @@ def injectPayload(payloadNumber):
 
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayout(kbd)
-duckyScriptPath = ["payload1.dd", "payload2.dd", "payload3.dd", "payload4.dd", "payload.dd"]
+duckyScriptPath = ["payload1.txt", "payload2.txt", "payload3.txt", "payload4.txt", "payload.txt"]
 
 # sleep at the start to allow the device to be recognized by the host computer
 time.sleep(.5)
@@ -153,7 +153,7 @@ print(progStatus)
 
 if(progStatus == True):
     # not in setup mode, inject the payload
-    print("Attack Mode: Running payload.dd")
+    print("Attack Mode: Running payload.txt")
     injectPayload(4)
     print("Done")
 else:
@@ -168,4 +168,3 @@ while True:
             injectPayload(i)
         if buttons[i].rose:
             print("button",i,"released!")
-
