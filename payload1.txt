@@ -1,0 +1,10 @@
+REM Extended Warranty Reminder, opens TextEdit on MacOS and types contents of spam voicemail, by @Skickar 2022
+DELAY 100
+GUI SPACE
+DELAY 1000
+STRING textedit
+ENTER
+DELAY 1000
+GUI N
+DELAY 100
+STRING Hi, this is Melanie and I'm giving you a call from the dealer service center. We recently noticed your car's extended warranty would expire and wanted to provide you with one final courtesy call before your warranty expires, June 10th, your warranty coverage becomes voided. This would make you financially responsible for all Service Repairs. If you wish to extend or reinstate your car's warranty, press for now, or press 9 to be continued coverage and discontinue receiving these reminders. 
