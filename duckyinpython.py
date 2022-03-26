@@ -1,6 +1,15 @@
 # License : GPLv2.0
 # copyright (c) 2021  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
+# Modified by mm12, @_Catt0s
+
+# mode list: 
+ # setup pin gp28, 
+ # usb disable 15 
+# bit0 = GPIO02 to GND
+# bit1 = GPIO06 to GND
+# bit3 = GPIO10 to GND
+# bit4 = GPIO14 to GND   
 
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
@@ -113,9 +122,9 @@ led.value = True
 
 
 def getProgrammingStatus():
-    # check GP0 for setup mode
+    # check GP27 for setup mode
     # see setup mode for instructions
-    progStatusPin = digitalio.DigitalInOut(GP0)
+    progStatusPin = digitalio.DigitalInOut(GP28)
     progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
     progStatus = not progStatusPin.value
     return(progStatus)
@@ -140,45 +149,29 @@ def runScript(file):
             parseLine(line)
             previousLine = line
         time.sleep(float(defaultDelay)/1000)
-
+     
 def selectPayload():
     payload = "payload.dd"
-    # check switch status
-    # payload1 = GPIO4 to GND
-    # payload2 = GPIO5 to GND
-    # payload3 = GPIO10 to GND
-    # payload4 = GPIO11 to GND
-    payload1Pin = digitalio.DigitalInOut(GP4)
+    # bit0 = GPIO02 to GND
+    # bit1 = GPIO06 to GND
+    # bit3 = GPIO10 to GND
+    # bit4 = GPIO14 to GND
+    payload1Pin = digitalio.DigitalInOut(GP2)
     payload1Pin.switch_to_input(pull=digitalio.Pull.UP)
-    payload1State = not payload1Pin.value
-    payload2Pin = digitalio.DigitalInOut(GP5)
+    bits[0] = not payload1Pin.value
+    payload2Pin = digitalio.DigitalInOut(GP6)
     payload2Pin.switch_to_input(pull=digitalio.Pull.UP)
-    payload2State = not payload2Pin.value
+    bits[1] = not payload2Pin.value
     payload3Pin = digitalio.DigitalInOut(GP10)
     payload3Pin.switch_to_input(pull=digitalio.Pull.UP)
-    payload3State = not payload3Pin.value
-    payload4Pin = digitalio.DigitalInOut(GP11)
+    bits[2] = not payload3Pin.value
+    payload4Pin = digitalio.DigitalInOut(GP14)
     payload4Pin.switch_to_input(pull=digitalio.Pull.UP)
-    payload4State = not payload4Pin.value
+    bits[3] = not payload4Pin.value
 
-
-    if(payload1State == True):
-        payload = "payload.dd"
-
-    elif(payload2State == True):
-        payload = "payload2.dd"
-
-    elif(payload3State == True):
-        payload = "payload3.dd"
-
-    elif(payload4State == True):
-        payload = "payload4.dd"
-
-    else:
-        # if all pins are high, then no switch is present
-        # default to payload1
-        payload = "payload.dd"
-
+    index = hex(int(''.join([str(int(b)) for b in bits]), 2))[2:].upper()
+    payload = "payload" + index + ".dd"
+    
 
     return payload
 
