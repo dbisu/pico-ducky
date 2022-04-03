@@ -18,6 +18,10 @@ import displayio
 import adafruit_framebuf
 import adafruit_displayio_sh1106
 import time
+import wifi
+import socketpool
+import adafruit_requests
+import ssl
 
 ## Screen setup and function to change image on the screen
 displayio.release_displays()
@@ -37,6 +41,10 @@ def NugEyes(IMAGE): ## Make a function to put eyes on the screen
 
 NugEyes("/faces/menu.bmp")
 
+# Button 1 = UP
+# Button 2 = DOWN
+# Button 3 = LEFT
+# Button 4 = RIGHT
 pins = (board.IO9, board.IO18, board.IO11, board.IO7)
 buttons = []   # will hold list of Debouncer objects
 for pin in pins:   # set up each pin
@@ -136,6 +144,69 @@ def injectPayload(payloadNumber):
     print("Done")
     NugEyes("/faces/menu.bmp")
 
+def startWiFi():
+    # Get wifi details and more from a secrets.py file
+    try:
+        from secrets import secrets
+    except ImportError:
+        print("WiFi secrets are kept in secrets.py, please add them there!")
+        raise
+
+    notConnected = True
+    while(notConnected == True):
+        try:
+            print("Connect wifi")
+            wifi.radio.connect(secrets['ssid'],secrets['password'], timeout=30)
+            notConnected = False
+            #wifi.radio.start_ap(secrets['ssid'],secrets['password'])
+            HOST = repr(wifi.radio.ipv4_address)
+            PORT = 80
+            print(HOST,PORT)
+        except ConnectionError:
+            print("No Wifi Network found, retrying in 5 sec")
+            time.sleep(5)
+
+def connectRemote():
+    startWiFi()
+    host = repr(wifi.radio.ipv4_gateway)
+
+    global requests
+    pool = socketpool.SocketPool(wifi.radio)
+    requests = adafruit_requests.Session(pool, ssl.create_default_context())
+
+    readButtons()
+
+    while True:
+        remoteLoop(host)
+
+def sendRunPayload(host, buttonNum):
+    global requests
+    run_api_url = "http://"+host+"/api/run/"+str(buttonNum)
+    print("Sending ", run_api_url)
+    NugEyes("/faces/boingo.bmp")
+    data = b' '
+    r = requests.get(run_api_url,data=data)
+
+def readButtons():
+    buttonNum = -1
+    for i in range(len(buttons)):
+        buttons[i].update()
+        if buttons[i].fell:
+            print("button",i,"pressed!")
+        if buttons[i].rose:
+            print("button",i,"released!")
+            buttonNum = i + 1
+    return(buttonNum)
+
+def remoteLoop(host):
+    buttonNum = readButtons()
+    #print(buttonNum)
+    if(buttonNum > 0):
+        sendRunPayload(host, buttonNum)
+
+    NugEyes("/faces/remote-menu.bmp")
+
+
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayout(kbd)
 duckyScriptPath = ["payload1.txt", "payload2.txt", "payload3.txt", "payload4.txt", "payload.txt"]
@@ -144,27 +215,29 @@ duckyScriptPath = ["payload1.txt", "payload2.txt", "payload3.txt", "payload4.txt
 time.sleep(.5)
 defaultDelay = 0
 
-progStatus = False
-progStatusPin = buttons[3]
-progStatus = not progStatusPin.value
+remoteStatus = False
+remoteEnablePin = buttons[3] # Right
+remoteStatus = not remoteEnablePin.value
 defaultDelay = 0
 
-print(progStatus)
+print(remoteStatus)
 
-if(progStatus == True):
+readButtons()
+
+if(remoteStatus == True):
     # not in setup mode, inject the payload
-    print("Attack Mode: Running payload.txt")
-    injectPayload(4)
+    print("Connecting to remote ducky")
+    connectRemote()
     print("Done")
 else:
     print("Entering menu")
 
-while True:
-    for i in range(len(buttons)):
-        buttons[i].update()
-        if buttons[i].fell:
-            print("button",i,"pressed!")
-            NugEyes("/faces/boingo.bmp")
-            injectPayload(i)
-        if buttons[i].rose:
-            print("button",i,"released!")
+    while True:
+        for i in range(len(buttons)):
+            buttons[i].update()
+            if buttons[i].fell:
+                print("button",i,"pressed!")
+                NugEyes("/faces/boingo.bmp")
+                injectPayload(i)
+            if buttons[i].rose:
+                print("button",i,"released!")
