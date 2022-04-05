@@ -143,19 +143,22 @@ def runScript(file):
     global defaultDelay
 
     duckyScriptPath = file
-    f = open(duckyScriptPath,"r",encoding='utf-8')
-    previousLine = ""
-    for line in f:
-        line = line.rstrip()
-        if(line[0:6] == "REPEAT"):
-            for i in range(int(line[7:])):
-                #repeat the last command
-                parseLine(previousLine)
-                time.sleep(float(defaultDelay)/1000)
-        else:
-            parseLine(line)
-            previousLine = line
-        time.sleep(float(defaultDelay)/1000)
+    try:
+        f = open(duckyScriptPath,"r",encoding='utf-8')
+        previousLine = ""
+        for line in f:
+            line = line.rstrip()
+            if(line[0:6] == "REPEAT"):
+                for i in range(int(line[7:])):
+                    #repeat the last command
+                    parseLine(previousLine)
+                    time.sleep(float(defaultDelay)/1000)
+            else:
+                parseLine(line)
+                previousLine = line
+            time.sleep(float(defaultDelay)/1000)
+    except OSError as e:
+        print("Unable to open file ", file)
 
 def selectPayload():
     payload = "payload.dd"
