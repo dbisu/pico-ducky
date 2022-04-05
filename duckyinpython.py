@@ -19,8 +19,25 @@ import supervisor
 import time
 import digitalio
 from board import *
-led = digitalio.DigitalInOut(LED)
-led.direction = digitalio.Direction.OUTPUT
+import pwmio
+
+led = pwmio.PWMOut(LED, frequency=5000, duty_cycle=0)
+
+def led_pwm_up(led):
+    for i in range(100):
+        # PWM LED up and down
+        if i < 50:
+            led.duty_cycle = int(i * 2 * 65535 / 100)  # Up
+        time.sleep(0.01)
+def led_pwm_down(led):
+    for i in range(100):
+        # PWM LED up and down
+        if i >= 50:
+            led.duty_cycle = 65535 - int((i - 50) * 2 * 65535 / 100)  # Down
+        time.sleep(0.01)
+
+# led = digitalio.DigitalInOut(LED)
+# led.direction = digitalio.Direction.OUTPUT
 
 duckyCommands = {
     'WINDOWS': Keycode.WINDOWS, 'GUI': Keycode.GUI,
@@ -109,8 +126,7 @@ supervisor.disable_autoreload()
 # sleep at the start to allow the device to be recognized by the host computer
 time.sleep(.5)
 
-led.value = True
-
+led_pwm_up(led)
 
 def getProgrammingStatus():
     # check GP0 for setup mode
@@ -198,8 +214,12 @@ if(progStatus == False):
 else:
     print("Update your payload")
 
+led_state = False
 while True:
-    time.sleep(1.0)
-    led.value = False
-    time.sleep(1.0)
-    led.value = True
+    if led_state:
+        led_pwm_up(led)
+        led_state = False
+    else:
+        led_pwm_down(led)
+        led_state = True
+    
