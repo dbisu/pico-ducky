@@ -111,6 +111,22 @@ from keyboard_layout_win_LANG import KeyboardLayout
 from keycode_win_LANG import Keycode
 ```
 
+##### Example:  Set to German Keyboard (WIN_DE)
+
+```py
+from keyboard_layout_win_de import KeyboardLayout
+from keycode_win_de import Keycode
+```
+
+Copy the files keyboard_layout_win_de.mpy and keycode_win_de.mpy to the /lib folder on the Pico board
+```
+adafruit_hid/
+keyboard_layout_win_de.mpy
+keycode_win_de.mpy
+```
+
+
+
 ## Useful links and resources
 
 ### Docs
