@@ -38,7 +38,7 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 ### Setup mode
 
-To edit the payload, enter setup mode by connecting the pin 1 (`GP0`) to pin 3 (`GND`), this will stop the pico-ducky from injecting the payload in your own machine.
+To edit the payload, enter setup mode by connecting the pin 12 (`GP9`) to pin 13 (`GND`), this will stop the pico-ducky from injecting the payload in your own machine.
 The easiest way to so is by using a jumper wire between those pins as seen bellow.
 
 ![Setup mode with a jumper](images/setup-mode.png)
@@ -50,7 +50,7 @@ Enter setup mode.
 Copy boot.py to the root of the pico-ducky.  
 Copy your payload script to the pico-ducky.  
 Disconnect the pico from your host PC.
-Connect a jumper wire between pin 18 (`GND`) and pin 20 (`GPIO15`).
+Connect a jumper wire between pin 13 (`GND`) and pin 14 (`GP10`).
 This will prevent the pico-ducky from showing up as a USB drive when plugged into the target computer.  
 Remove the jumper and reconnect to your PC to reprogram.
 The default mode is USB mass storage enabled.   
