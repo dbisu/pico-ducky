@@ -131,7 +131,7 @@ led_pwm_up(led)
 def getProgrammingStatus():
     # check GP0 for setup mode
     # see setup mode for instructions
-    progStatusPin = digitalio.DigitalInOut(GP0)
+    progStatusPin = digitalio.DigitalInOut(GP9)
     progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
     progStatus = not progStatusPin.value
     return(progStatus)
@@ -165,18 +165,18 @@ def selectPayload():
     # check switch status
     # payload1 = GPIO4 to GND
     # payload2 = GPIO5 to GND
-    # payload3 = GPIO10 to GND
-    # payload4 = GPIO11 to GND
+    # payload3 = GPIO6 to GND
+    # payload4 = GPIO7 to GND
     payload1Pin = digitalio.DigitalInOut(GP4)
     payload1Pin.switch_to_input(pull=digitalio.Pull.UP)
     payload1State = not payload1Pin.value
     payload2Pin = digitalio.DigitalInOut(GP5)
     payload2Pin.switch_to_input(pull=digitalio.Pull.UP)
     payload2State = not payload2Pin.value
-    payload3Pin = digitalio.DigitalInOut(GP10)
+    payload3Pin = digitalio.DigitalInOut(GP6)
     payload3Pin.switch_to_input(pull=digitalio.Pull.UP)
     payload3State = not payload3Pin.value
-    payload4Pin = digitalio.DigitalInOut(GP11)
+    payload4Pin = digitalio.DigitalInOut(GP7)
     payload4Pin.switch_to_input(pull=digitalio.Pull.UP)
     payload4State = not payload4Pin.value
 
