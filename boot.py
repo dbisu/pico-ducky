@@ -3,7 +3,7 @@ import digitalio
 import storage
 
 noStorageStatus = False
-noStoragePin = digitalio.DigitalInOut(GP15)
+noStoragePin = digitalio.DigitalInOut(GP10)
 noStoragePin.switch_to_input(pull=digitalio.Pull.UP)
 noStorageStatus = not noStoragePin.value
 
