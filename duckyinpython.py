@@ -163,26 +163,26 @@ def runScript(file):
 def selectPayload():
     payload = "payload.dd"
     # check switch status
-    # payload1 = GPIO4 to GND
-    # payload2 = GPIO5 to GND
-    # payload3 = GPIO6 to GND
-    # payload4 = GPIO7 to GND
-    payload1Pin = digitalio.DigitalInOut(GP4)
+    # payload1 = GPIO2 to GND
+    # payload2 = GPIO3 to GND
+    # payload3 = GPIO4 to GND
+    # payload4 = GPIO5 to GND
+    payload1Pin = digitalio.DigitalInOut(GP2)
     payload1Pin.switch_to_input(pull=digitalio.Pull.UP)
     payload1State = not payload1Pin.value
-    payload2Pin = digitalio.DigitalInOut(GP5)
+    payload2Pin = digitalio.DigitalInOut(GP3)
     payload2Pin.switch_to_input(pull=digitalio.Pull.UP)
     payload2State = not payload2Pin.value
-    payload3Pin = digitalio.DigitalInOut(GP6)
+    payload3Pin = digitalio.DigitalInOut(GP4)
     payload3Pin.switch_to_input(pull=digitalio.Pull.UP)
     payload3State = not payload3Pin.value
-    payload4Pin = digitalio.DigitalInOut(GP7)
+    payload4Pin = digitalio.DigitalInOut(GP5)
     payload4Pin.switch_to_input(pull=digitalio.Pull.UP)
     payload4State = not payload4Pin.value
 
 
     if(payload1State == True):
-        payload = "payload.dd"
+        payload = "payload1.dd"
 
     elif(payload2State == True):
         payload = "payload2.dd"
