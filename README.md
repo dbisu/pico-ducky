@@ -62,10 +62,11 @@ The default mode is USB mass storage enabled.
 You will need a rotary dip switch [like this one](https://www.digikey.com/en/products/detail/nidec-copal-electronics/SH-7050MC/2057879).
 Wire it as shown below. LSB is GP2, MSB is GP5.
 Payload options are payload.dd (as default) and payload(`1-15`).dd
-![Payload Selection] (images/payload-options.png)
+
+![Payload Selection](images/payload-options.png)
 
 TODO: revert to payload.dd if no file exists.
-Now it just does nothing.
+Now, it just does nothing.
 
 ### Changing Keyboard Layouts
 
