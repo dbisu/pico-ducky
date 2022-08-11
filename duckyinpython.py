@@ -163,41 +163,73 @@ def runScript(file):
 def selectPayload():
     payload = "payload.dd"
     # check switch status
-    # payload1 = GPIO2 to GND
-    # payload2 = GPIO3 to GND
-    # payload3 = GPIO4 to GND
-    # payload4 = GPIO5 to GND
-    payload1Pin = digitalio.DigitalInOut(GP2)
-    payload1Pin.switch_to_input(pull=digitalio.Pull.UP)
-    payload1State = not payload1Pin.value
-    payload2Pin = digitalio.DigitalInOut(GP3)
-    payload2Pin.switch_to_input(pull=digitalio.Pull.UP)
-    payload2State = not payload2Pin.value
-    payload3Pin = digitalio.DigitalInOut(GP4)
-    payload3Pin.switch_to_input(pull=digitalio.Pull.UP)
-    payload3State = not payload3Pin.value
-    payload4Pin = digitalio.DigitalInOut(GP5)
-    payload4Pin.switch_to_input(pull=digitalio.Pull.UP)
-    payload4State = not payload4Pin.value
+    # rotary1 = GPIO2 to GND
+    # rotary2 = GPIO3 to GND
+    # rotary4 = GPIO4 to GND
+    # rotary8 = GPIO5 to GND
+    rotary1Pin = digitalio.DigitalInOut(GP2)
+    rotary1Pin.switch_to_input(pull=digitalio.Pull.UP)
+    rotary1State = not rotary1Pin.value
+    rotary2Pin = digitalio.DigitalInOut(GP3)
+    rotary2Pin.switch_to_input(pull=digitalio.Pull.UP)
+    rotary2State = not rotary2Pin.value
+    rotary4Pin = digitalio.DigitalInOut(GP4)
+    rotary4Pin.switch_to_input(pull=digitalio.Pull.UP)
+    rotary4State = not rotary4Pin.value
+    rotary8Pin = digitalio.DigitalInOut(GP5)
+    rotary8Pin.switch_to_input(pull=digitalio.Pull.UP)
+    rotary8State = not rotary8Pin.value
 
 
-    if(payload1State == True):
+    if rotary1State == True and rotary2State == False and rotary4State == False and rotary8State == False:
         payload = "payload1.dd"
 
-    elif(payload2State == True):
+    elif rotary1State == False and rotary2State == True and rotary4State == False and rotary8State == False:
         payload = "payload2.dd"
 
-    elif(payload3State == True):
+    elif rotary1State == True and rotary2State == True and rotary4State == False and rotary8State == False:
         payload = "payload3.dd"
 
-    elif(payload4State == True):
+    elif rotary1State == False and rotary2State == False and rotary4State == True and rotary8State == False:
         payload = "payload4.dd"
+    
+    elif rotary1State == True and rotary2State == False and rotary4State == True and rotary8State == False:
+        payload = "payload5.dd"
+
+    elif rotary1State == False and rotary2State == True and rotary4State == True and rotary8State == False:
+        payload = "payload6.dd"
+        
+    elif rotary1State == True and rotary2State == True and rotary4State == True and rotary8State == False:
+        payload = "payload7.dd"
+
+    elif rotary1State == False and rotary2State == False and rotary4State == False and rotary8State == True:
+        payload = "payload8.dd"
+
+    elif rotary1State == True and rotary2State == False and rotary4State == False and rotary8State == True:
+        payload = "payload9.dd"
+        
+    elif rotary1State == False and rotary2State == True and rotary4State == False and rotary8State == True:
+        payload = "payload10.dd"
+        
+    elif rotary1State == True and rotary2State == True and rotary4State == False and rotary8State == True:
+        payload = "payload11.dd"
+        
+    elif rotary1State == False and rotary2State == False and rotary4State == True and rotary8State == True:
+        payload = "payload12.dd"
+        
+    elif rotary1State == True and rotary2State == False and rotary4State == True and rotary8State == True:
+        payload = "payload13.dd"
+        
+    elif rotary1State == False and rotary2State == True and rotary4State == True and rotary8State == True:
+        payload = "payload14.dd"
+
+    elif rotary1State == True and rotary2State == True and rotary4State == True and rotary8State == True:
+        payload = "payload15.dd"
 
     else:
         # if all pins are high, then no switch is present
-        # default to payload1
+        # default to payload
         payload = "payload.dd"
-
 
     return payload
 
