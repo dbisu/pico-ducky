@@ -128,6 +128,11 @@ time.sleep(.5)
 
 led_pwm_up(led)
 
+#init button
+button1_pin = DigitalInOut(board.IO22) # defaults to input
+button1_pin.pull = Pull.UP      # turn on internal pull-up resistor
+button1 =  Debouncer(button1_pin)
+
 def getProgrammingStatus():
     # check GP0 for setup mode
     # see setup mode for instructions
@@ -216,10 +221,15 @@ else:
 
 led_state = False
 while True:
+    button1.update()
+    button1Pushed = button1.fell
+    if(button1Pushed):
+        runScript(payload)
+        button1Pushed = False
+
     if led_state:
         led_pwm_up(led)
         led_state = False
     else:
         led_pwm_down(led)
         led_state = True
-    
