@@ -18,6 +18,8 @@ import supervisor
 
 import time
 import digitalio
+from digitalio import DigitalInOut, Pull
+from adafruit_debouncer import Debouncer
 from board import *
 import pwmio
 
@@ -129,7 +131,7 @@ time.sleep(.5)
 led_pwm_up(led)
 
 #init button
-button1_pin = DigitalInOut(board.IO22) # defaults to input
+button1_pin = DigitalInOut(GP22) # defaults to input
 button1_pin.pull = Pull.UP      # turn on internal pull-up resistor
 button1 =  Debouncer(button1_pin)
 
