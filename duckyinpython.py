@@ -127,9 +127,9 @@ time.sleep(.5)
 led_pwm_up(led)
 
 #init button
-button1_pin = DigitalInOut(GP22) # defaults to input
-button1_pin.pull = Pull.UP      # turn on internal pull-up resistor
-button1 =  Debouncer(button1_pin)
+runScriptButton_pin = DigitalInOut(GP22) # defaults to input
+runScriptButton_pin.pull = Pull.UP       # turn on internal pull-up resistor
+runScriptButton =  Debouncer(runScriptButton_pin)
 
 def getProgrammingStatus():
     # check GP0 for setup mode
@@ -201,7 +201,6 @@ def selectPayload():
         # default to payload1
         payload = "payload.dd"
 
-
     return payload
 
 progStatus = False
@@ -219,15 +218,14 @@ else:
 
 led_state = False
 while True:
-    button1.update()
-    button1Pushed = button1.fell
-    if(button1Pushed):
+    runScriptButton.update()
+    if(runScriptButton.fell):
         runScript(payload)
         button1Pushed = False
-
+    
     if led_state:
-        led_pwm_up(led)
+    led_pwm_up(led)
         led_state = False
     else:
-        led_pwm_down(led)
+    led_pwm_down(led)
         led_state = True
