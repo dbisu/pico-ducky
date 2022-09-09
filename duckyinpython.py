@@ -221,7 +221,6 @@ while True:
     runScriptButton.update()
     if(runScriptButton.fell):
         runScript(payload)
-        button1Pushed = False
     
     if led_state:
     led_pwm_up(led)
