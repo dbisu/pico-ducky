@@ -205,13 +205,12 @@ def selectPayload():
 
 progStatus = False
 progStatus = getProgrammingStatus()
+payload = selectPayload()
 
 if(progStatus == False):
     # not in setup mode, inject the payload
-    payload = selectPayload()
     print("Running ", payload)
     runScript(payload)
-
     print("Done")
 else:
     print("Update your payload")
