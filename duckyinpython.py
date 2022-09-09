@@ -17,7 +17,6 @@ from adafruit_hid.keycode import Keycode
 import supervisor
 
 import time
-import digitalio
 from digitalio import DigitalInOut, Pull
 from adafruit_debouncer import Debouncer
 from board import *
@@ -37,9 +36,6 @@ def led_pwm_down(led):
         if i >= 50:
             led.duty_cycle = 65535 - int((i - 50) * 2 * 65535 / 100)  # Down
         time.sleep(0.01)
-
-# led = digitalio.DigitalInOut(LED)
-# led.direction = digitalio.Direction.OUTPUT
 
 duckyCommands = {
     'WINDOWS': Keycode.WINDOWS, 'GUI': Keycode.GUI,
@@ -138,8 +134,8 @@ button1 =  Debouncer(button1_pin)
 def getProgrammingStatus():
     # check GP0 for setup mode
     # see setup mode for instructions
-    progStatusPin = digitalio.DigitalInOut(GP0)
-    progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
+    progStatusPin = DigitalInOut(GP0)
+    progStatusPin.switch_to_input(pull=Pull.UP)
     progStatus = not progStatusPin.value
     return(progStatus)
 
@@ -174,17 +170,17 @@ def selectPayload():
     # payload2 = GPIO5 to GND
     # payload3 = GPIO10 to GND
     # payload4 = GPIO11 to GND
-    payload1Pin = digitalio.DigitalInOut(GP4)
-    payload1Pin.switch_to_input(pull=digitalio.Pull.UP)
+    payload1Pin = DigitalInOut(GP4)
+    payload1Pin.switch_to_input(pull=Pull.UP)
     payload1State = not payload1Pin.value
-    payload2Pin = digitalio.DigitalInOut(GP5)
-    payload2Pin.switch_to_input(pull=digitalio.Pull.UP)
+    payload2Pin = DigitalInOut(GP5)
+    payload2Pin.switch_to_input(pull=Pull.UP)
     payload2State = not payload2Pin.value
-    payload3Pin = digitalio.DigitalInOut(GP10)
-    payload3Pin.switch_to_input(pull=digitalio.Pull.UP)
+    payload3Pin = DigitalInOut(GP10)
+    payload3Pin.switch_to_input(pull=Pull.UP)
     payload3State = not payload3Pin.value
-    payload4Pin = digitalio.DigitalInOut(GP11)
-    payload4Pin.switch_to_input(pull=digitalio.Pull.UP)
+    payload4Pin = DigitalInOut(GP11)
+    payload4Pin.switch_to_input(pull=Pull.UP)
     payload4State = not payload4Pin.value
 
 
