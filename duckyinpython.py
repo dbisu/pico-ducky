@@ -24,19 +24,6 @@ import pwmio
 
 led = pwmio.PWMOut(LED, frequency=5000, duty_cycle=0)
 
-def led_pwm_up(led):
-    for i in range(100):
-        # PWM LED up and down
-        if i < 50:
-            led.duty_cycle = int(i * 2 * 65535 / 100)  # Up
-        time.sleep(0.01)
-def led_pwm_down(led):
-    for i in range(100):
-        # PWM LED up and down
-        if i >= 50:
-            led.duty_cycle = 65535 - int((i - 50) * 2 * 65535 / 100)  # Down
-        time.sleep(0.01)
-
 duckyCommands = {
     'WINDOWS': Keycode.WINDOWS, 'GUI': Keycode.GUI,
     'APP': Keycode.APPLICATION, 'MENU': Keycode.APPLICATION, 'SHIFT': Keycode.SHIFT,
@@ -123,8 +110,6 @@ supervisor.disable_autoreload()
 
 # sleep at the start to allow the device to be recognized by the host computer
 time.sleep(.5)
-
-led_pwm_up(led)
 
 #init button
 runScriptButton_pin = DigitalInOut(GP22) # defaults to input
@@ -215,15 +200,15 @@ if(progStatus == False):
 else:
     print("Update your payload")
 
-led_state = False
 while True:
-    runScriptButton.update()
-    if(runScriptButton.fell):
-        runScript(payload)
-    
-    if led_state:
-    led_pwm_up(led)
-        led_state = False
-    else:
-    led_pwm_down(led)
-        led_state = True
+    for i in range(100):
+        # PWM LED up and down
+        if i < 50:
+            led.duty_cycle = int(i * 2 * 65535 / 100)  # Up
+        if i >= 50:
+            led.duty_cycle = 65535 - int((i - 50) * 2 * 65535 / 100)  # Down
+        time.sleep(0.01)
+
+        runScriptButton.update()
+        if(runScriptButton.fell):
+            runScript(payload)
