@@ -133,6 +133,10 @@ keycode_win_de.mpy
 
 ## Useful links and resources
 
+### How to recover your Pico if it becomes corrupted or doesn't boot.
+
+[Reset Instructions](RESET.md)
+
 ### Installation Tool
 
 [raspberrypi5621](https://github.com/raspberrypi5621) Created a tool to convert a blank RPi Pico to a ducky.  
