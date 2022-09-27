@@ -58,7 +58,7 @@ If you need the pico-ducky to not show up as a USB mass storage device for steal
 Enter setup mode.    
 Copy your payload script to the pico-ducky.  
 Disconnect the pico from your host PC.
-Connect a jumper wire between pin 18 (`GND`) and pin 20 (`GPIO15`).
+Connect a jumper wire between pin 18 (`GND`) and pin 20 (`GPIO15`).  
 This will prevent the pico-ducky from showing up as a USB drive when plugged into the target computer.  
 Remove the jumper and reconnect to your PC to reprogram.
 The default mode is USB mass storage enabled.   
