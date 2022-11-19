@@ -22,7 +22,8 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 1. Clone the repo to get a local copy of the files. `git clone https://github.com/dbisu/pico-ducky.git`
 
-2. Download [CircuitPython for the Raspberry Pi Pico](https://circuitpython.org/board/raspberry_pi_pico/). *Updated to 7.0.0
+2. Download [CircuitPython for the Raspberry Pi Pico](https://circuitpython.org/board/raspberry_pi_pico/). *Updated to 8.0.0  
+   Download [CircuitPython for the Raspberry Pi Pico W](https://circuitpython.org/board/raspberry_pi_pico_w/). *Updated to 8.0.0
 
 3. Plug the device into a USB port while holding the boot button. It will show up as a removable media device named `RPI-RP2`.
 
@@ -38,10 +39,9 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 9. Copy `boot.py` from your clone to the root of your Pico.
 
-10. Copy `duckyinpython.py` as `code.py` in the root of the Raspberry Pi Pico, overwriting the previous file.  
-     Linux: `cp duckyinpython.py </path/to/pico/code.py`
+10. Copy `duckyinpython.py`, `code.py`, `webapp.py`, `wsgiserver.py` to the root folder of the Pico.
 
-11. Find a script [here](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Payloads) or [create your own one using Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) and save it as `payload.dd` in the Pico.
+11. Find a script [here](https://github.com/hak5/usbrubberducky-payloads) or [create your own one using Ducky Script](https://docs.hak5.org/hak5-usb-rubber-ducky/ducky-script-basics/hello-world) and save it as `payload.dd` in the Pico. Currently, pico-ducky currently supports DuckScript 1.0, not 3.0.
 
 12. Be careful, if your device isn't in [setup mode](#setup-mode), the device will reboot and after half a second, the script will run.
 
