@@ -33,6 +33,7 @@ if(board.board_id == 'raspberry_pi_pico_w'):
 time.sleep(.5)
 
 def startWiFi():
+    import ipaddress
     # Get wifi details and more from a secrets.py file
     try:
         from secrets import secrets
@@ -44,6 +45,11 @@ def startWiFi():
     #wifi.radio.connect(secrets['ssid'],secrets['password'])
     #wifi.radio.start_ap(secrets['ssid'],secrets['password']) # currently not working
 
+    ipv4 =  ipaddress.IPv4Address("192.168.1.42")
+    netmask =  ipaddress.IPv4Address("255.255.255.0")
+    gateway =  ipaddress.IPv4Address("192.168.1.1")
+    wifi.radio.set_ipv4_address(ipv4=ipv4,netmask=netmask,gateway=gateway)
+
     HOST = repr(wifi.radio.ipv4_address_ap)
     PORT = 80        # Port to listen on
     print(HOST,PORT)
@@ -52,15 +58,20 @@ def startWiFi():
 #supervisor.disable_autoreload()
 supervisor.runtime.autoreload = False
 
-led = pwmio.PWMOut(board.LED, frequency=5000, duty_cycle=0)
+if(board.board_id == 'raspberry_pi_pico'):
+    led = pwmio.PWMOut(board.LED, frequency=5000, duty_cycle=0)
+elif(board.board_id == 'raspberry_pi_pico_w'):
+    led = digitalio.DigitalInOut(board.LED)
+    led.switch_to_output()
 
 
 progStatus = False
 progStatus = getProgrammingStatus()
-
+print("progStatus", progStatus)
 if(progStatus == False):
+    print("Finding payload")
     # not in setup mode, inject the payload
-    payload = selectPayload()
+    payload = selectPayload(None)
     print("Running ", payload)
     runScript(payload)
 
@@ -72,15 +83,17 @@ led_state = False
 
 async def main_loop():
     global led,button1
-    pico_led_task = asyncio.create_task(blink_pico_led(led))
+
     button_task = asyncio.create_task(monitor_buttons(button1))
-    task_list = [pico_led_task, button_task]
     if(board.board_id == 'raspberry_pi_pico_w'):
+        pico_led_task = asyncio.create_task(blink_pico_w_led(led))
         print("Starting Wifi")
         startWiFi()
         print("Starting Web Service")
         webservice_task = asyncio.create_task(startWebService())
-        task_list.append(webservice_task)
-    await asyncio.gather(*task_list)
+        await asyncio.gather(pico_led_task, button_task, webservice_task)
+    else:
+        pico_led_task = asyncio.create_task(blink_pico_led(led))
+        await asyncio.gather(pico_led_task, button_task)
 
 asyncio.run(main_loop())

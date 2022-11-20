@@ -7,6 +7,7 @@ import time
 import digitalio
 from digitalio import DigitalInOut, Pull
 from adafruit_debouncer import Debouncer
+import board
 from board import *
 import pwmio
 import asyncio
@@ -166,7 +167,6 @@ def selectPayload():
     payload3State = not payload3Pin.value
     payload4State = not payload4Pin.value
 
-
     if(payload1State == True):
         payload = "payload.dd"
 
@@ -184,9 +184,14 @@ def selectPayload():
         # default to payload1
         payload = "payload.dd"
 
-
     return payload
 
+async def blink_led(led):
+    print("Blink")
+    if(board.board_id == 'raspberry_pi_pico'):
+        blink_pico_led(led)
+    elif(board.board_id == 'raspberry_pi_pico_w'):
+        blink_pico_w_led(led)
 
 async def blink_pico_led(led):
     print("starting blink_pico_led")
@@ -211,6 +216,22 @@ async def blink_pico_led(led):
                 await asyncio.sleep(0.01)
             led_state = True
         await asyncio.sleep(0)
+
+async def blink_pico_w_led(led):
+    print("starting blink_pico_w_led")
+    led_state = False
+    while True:
+        if led_state:
+            print("led on")
+            led.value = 1
+            await asyncio.sleep(0.5)
+            led_state = False
+        else:
+            print("led off")
+            led.value = 0
+            await asyncio.sleep(0.5)
+            led_state = True
+        await asyncio.sleep(0.5)
 
 async def monitor_buttons(button1):
     global inBlinkeyMode, inMenu, enableRandomBeep, enableSirenMode,pixel
