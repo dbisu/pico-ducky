@@ -210,10 +210,7 @@ def run_script(request, filenumber):
 
 async def startWebService():
 
-    #web_app = WSGIApp()
-
     HOST = repr(wifi.radio.ipv4_address_ap)
-    HOST = "192.168.0.4"
     PORT = 80        # Port to listen on
     print(HOST,PORT)
 

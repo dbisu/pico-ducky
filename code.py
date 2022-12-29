@@ -43,12 +43,7 @@ def startWiFi():
 
     print("Connect wifi")
     #wifi.radio.connect(secrets['ssid'],secrets['password'])
-    #wifi.radio.start_ap(secrets['ssid'],secrets['password']) # currently not working
-
-    ipv4 =  ipaddress.IPv4Address("192.168.1.42")
-    netmask =  ipaddress.IPv4Address("255.255.255.0")
-    gateway =  ipaddress.IPv4Address("192.168.1.1")
-    wifi.radio.set_ipv4_address(ipv4=ipv4,netmask=netmask,gateway=gateway)
+    wifi.radio.start_ap(secrets['ssid'],secrets['password'])
 
     HOST = repr(wifi.radio.ipv4_address_ap)
     PORT = 80        # Port to listen on
