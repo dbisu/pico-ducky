@@ -46,18 +46,19 @@ new_html = """<!DOCTYPE html>
 <html>
   <head>
     <title>New Script</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>@import url(https://fonts.googleapis.com/css2?family=Open+Sans&display=swap);button{margin-top:1em}.main{font-family:'Open Sans',sans-serif;margin:2%}textarea{width:100%;max-width:80vh}#ducky-input{height:50vh}</style>
   </head>
   <body>
-    <form action="/new" method="POST">
-      Script Name<br>
-      <textarea rows="1" cols="60" name="scriptName"></textarea>
-      Script<br>
-      <textarea rows="5" cols="60" name="scriptData"></textarea>
-      <br/>
-      <input type="submit" value="submit"/>
-    </form>
-    <br>
-    <a href="/ducky">Home</a>
+    <div class="main">
+        <form action="/new" method="POST">
+            <p>New Script:</p>
+            <textarea rows="1" name="scriptName" placeholder="script name"></textarea><br>
+            <textarea id="ducky-input" rows="5" name="scriptData" placeholder="script"></textarea>
+            <br><input type="submit" value="submit"/>
+          </form>
+          <a href="/ducky"><button>go back</button></a>
+    </div>
   </body>
 </html>
 """
