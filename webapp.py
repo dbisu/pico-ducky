@@ -47,7 +47,7 @@ new_html = """<!DOCTYPE html>
   <head>
     <title>New Script</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>@import url(https://fonts.googleapis.com/css2?family=Open+Sans&display=swap);button{margin-top:1em}.main{font-family:'Open Sans',sans-serif;margin:2%}textarea{width:100%;max-width:80vh}#ducky-input{height:50vh}</style>
+    <style>button{margin-top:1em}.main{font-family:'Open Sans',sans-serif;margin:2%}textarea{width:100%;max-width:80vh}#ducky-input{height:50vh}</style>
   </head>
   <body>
     <div class="main">
