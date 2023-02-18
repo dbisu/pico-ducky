@@ -83,11 +83,20 @@ If you need the pico-ducky to not show up as a USB mass storage device for steal
 - Connect a jumper wire between pin 18 (`GND`) and pin 20 (`GPIO15`).  
 This will prevent the pico-ducky from showing up as a USB drive when plugged into the target computer.  
 - Remove the jumper and reconnect to your PC to reprogram.  
-  
+
 Pico: The default mode is USB mass storage enabled.   
 Pico W: The default mode is USB mass storage **disabled**  
 
 ![USB enable/disable mode](images/usb-boot-mode.png)
+
+### Multiple payloads
+
+Multiple payloads can be stored on the Pico and Pico W.  
+To select a payload, ground one of these pins:
+- GP4 - payload.dd
+- GP5 - payload2.dd
+- GP10 - payload3.dd
+- GP11 - payload4.dd
 
 ### Changing Keyboard Layouts
 
