@@ -1,7 +1,7 @@
 # License : GPLv2.0
-# copyright (c) 2021  Dave Bailey
+# copyright (c) 2023  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
-# FeatherS2 board support
+# Pico and Pico W board support
 
 
 import usb_hid
