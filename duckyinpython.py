@@ -199,7 +199,7 @@ async def blink_pico_led(led):
     while True:
         if led_state:
             #led_pwm_up(led)
-            print("led up")
+            #print("led up")
             for i in range(100):
                 # PWM LED up and down
                 if i < 50:
@@ -208,7 +208,7 @@ async def blink_pico_led(led):
             led_state = False
         else:
             #led_pwm_down(led)
-            print("led down")
+            #print("led down")
             for i in range(100):
                 # PWM LED up and down
                 if i >= 50:
@@ -222,12 +222,12 @@ async def blink_pico_w_led(led):
     led_state = False
     while True:
         if led_state:
-            print("led on")
+            #print("led on")
             led.value = 1
             await asyncio.sleep(0.5)
             led_state = False
         else:
-            print("led off")
+            #print("led off")
             led.value = 0
             await asyncio.sleep(0.5)
             led_state = True

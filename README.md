@@ -37,13 +37,17 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 8. Copy `asyncio` to the `lib` folder on your Pico.
 
-9. Copy `boot.py` from your clone to the root of your Pico.
+9. Copy `adafruit_wsgi` to the `lib` folder on your Pico.
 
-10. Copy `duckyinpython.py`, `code.py`, `webapp.py`, `wsgiserver.py` to the root folder of the Pico.
+10. Copy `boot.py` from your clone to the root of your Pico.
 
-11. Find a script [here](https://github.com/hak5/usbrubberducky-payloads) or [create your own one using Ducky Script](https://docs.hak5.org/hak5-usb-rubber-ducky/ducky-script-basics/hello-world) and save it as `payload.dd` in the Pico. Currently, pico-ducky only supports DuckScript 1.0, not 3.0.
+11. Copy `duckyinpython.py`, `code.py`, `webapp.py`, `wsgiserver.py` to the root folder of the Pico.
 
-12. Be careful, if your device isn't in [setup mode](#setup-mode), the device will reboot and after half a second, the script will run.
+12. Find a script [here](https://github.com/hak5/usbrubberducky-payloads) or [create your own one using Ducky Script](https://docs.hak5.org/hak5-usb-rubber-ducky/ducky-script-basics/hello-world) and save it as `payload.dd` in the Pico. Currently, pico-ducky only supports DuckScript 1.0, not 3.0.
+
+13. Be careful, if your device isn't in [setup mode](#setup-mode), the device will reboot and after half a second, the script will run.
+
+14. **Please note:** by default Pico W will not show as a USB drive
 
 ### Pico W Web Service
 The Pico W AP defaults to ip address `192.168.4.1`.  You should be able to find the webservice at `http://192.168.4.1:80`  
@@ -73,13 +77,15 @@ The easiest way to so is by using a jumper wire between those pins as seen bello
 ### USB enable/disable mode
 
 If you need the pico-ducky to not show up as a USB mass storage device for stealth, follow these instructions.  
-Enter setup mode.    
-Copy your payload script to the pico-ducky.  
-Disconnect the pico from your host PC.
-Connect a jumper wire between pin 18 (`GND`) and pin 20 (`GPIO15`).  
+- Enter setup mode.    
+- Copy your payload script to the pico-ducky.  
+- Disconnect the pico from your host PC.
+- Connect a jumper wire between pin 18 (`GND`) and pin 20 (`GPIO15`).  
 This will prevent the pico-ducky from showing up as a USB drive when plugged into the target computer.  
-Remove the jumper and reconnect to your PC to reprogram.
-The default mode is USB mass storage enabled.   
+- Remove the jumper and reconnect to your PC to reprogram.  
+  
+Pico: The default mode is USB mass storage enabled.   
+Pico W: The default mode is USB mass storage **disabled**  
 
 ![USB enable/disable mode](images/usb-boot-mode.png)
 

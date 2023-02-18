@@ -66,7 +66,7 @@ print("progStatus", progStatus)
 if(progStatus == False):
     print("Finding payload")
     # not in setup mode, inject the payload
-    payload = selectPayload(None)
+    payload = selectPayload()
     print("Running ", payload)
     runScript(payload)
 
