@@ -4,18 +4,6 @@
 # Pico and Pico W board support
 
 
-import usb_hid
-from adafruit_hid.keyboard import Keyboard
-
-# comment out these lines for non_US keyboards
-from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
-from adafruit_hid.keycode import Keycode
-
-# uncomment these lines for non_US keyboards
-# replace LANG with appropriate language
-#from keyboard_layout_win_LANG import KeyboardLayout
-#from keycode_win_LANG import Keycode
-
 import supervisor
 
 
