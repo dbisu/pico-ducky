@@ -14,66 +14,75 @@ import wifi
 
 from duckyinpython import *
 
-payload_html = """<!DOCTYPE html>
-<html>
-    <head> <title>Pico W Ducky</title> </head>
-    <body> <h1>Pico W Ducky</h1>
-        <table border="1"> <tr><th>Payload</th><th>Actions</th></tr> {} </table>
-        <br>
-        <a href="/new">New Script</a>
+payload_html = """<html>
+    <head>
+        <title>Pico W Ducky</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>button{{margin:0.2em}}html{{font-family:'Open Sans', sans-serif;margin:2%}}table{{width:30%;max-width:20vh;margin-bottom:1em;border-collapse:collapse}}</style>
+    </head>
+    <body>
+        <h1>Pico W Ducky</h1>
+        <table border="1"><tr><th>Payload</th><th>Actions</th></tr>{}</table><br>
+        <a href="/new"><button>New Script</button></a>
     </body>
 </html>
 """
 
 edit_html = """<!DOCTYPE html>
 <html>
-  <head>
-    <title>Script Editor</title>
-  </head>
-  <body>
-    <form action="/write/{}" method="POST">
-      <textarea rows="5" cols="60" name="scriptData">{}</textarea>
-      <br/>
-      <input type="submit" value="submit"/>
-    </form>
-    <br>
-    <a href="/ducky">Home</a>
-  </body>
+    <head>
+        <title>Script Editor</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>button{{margin-top:1em}}.main{{font-family:'Open Sans', sans-serif;margin:2%}}textarea{{width:100%;max-width:80vh;margin-bottom:1em;height:50vh}}</style>
+    </head>
+    <body>
+        <form action="/write/{}" method="POST">
+            <textarea rows="5" name="scriptData">{}</textarea><br/>
+            <input type="submit" value="Submit"/>
+        </form>
+        <br>
+        <a href="/ducky"><button>Home</button></a>
+    </body>
 </html>
 """
 
 new_html = """<!DOCTYPE html>
 <html>
-  <head>
-    <title>New Script</title>
-  </head>
-  <body>
-    <form action="/new" method="POST">
-      Script Name<br>
-      <textarea rows="1" cols="60" name="scriptName"></textarea>
-      Script<br>
-      <textarea rows="5" cols="60" name="scriptData"></textarea>
-      <br/>
-      <input type="submit" value="submit"/>
-    </form>
-    <br>
-    <a href="/ducky">Home</a>
-  </body>
+    <head>
+        <title>New Script</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>button{margin-top:1em}.main{font-family:'Open Sans', sans-serif;margin:2%}textarea{width:100%;max-width:80vh;margin-bottom:1em}#ducky-input{height:50vh}</style>
+    </head>
+    <body>
+        <div class="main">
+            <form action="/new" method="POST">
+                <p>New Script:</p>
+                <textarea rows="1" name="scriptName" placeholder="script name"></textarea><br>
+                <textarea id="ducky-input" rows="5" name="scriptData" placeholder="script"></textarea>
+                <br><input type="submit" value="Submit"/>
+            </form>
+            <a href="/ducky"><button>Go Back</button></a>
+        </div>
+    </body>
 </html>
 """
 
 response_html = """<!DOCTYPE html>
 <html>
-    <head> <title>Pico W Ducky</title> </head>
-    <body> <h1>Pico W Ducky</h1>
+    <head>
+        <title>Pico W Ducky</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>button{{margin-top:1em}}body{{font-family:'Open Sans', sans-serif;margin:2%}}</style>
+    </head>
+    <body>
+        <h1>Pico W Ducky</h1>
         {}
-        <br>
-        <a href="/ducky">Home</a>
+        <br><a href="/ducky"><button>Home</button></a>
     </body>
 </html>
 """
 
-newrow_html = "<tr><td>{}</td><td><a href='/edit/{}'>Edit</a> / <a href='/run/{}'>Run</a></tr>"
+newrow_html = "<tr><td>{}</td><td><a href='/edit/{}'><button>Edit</button></a><a href='/run/{}'><button>Run</button></a></tr>"
 
 def setPayload(payload_number):
     if(payload_number == 1):
