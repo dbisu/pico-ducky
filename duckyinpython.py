@@ -13,6 +13,7 @@ import pwmio
 import asyncio
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.mouse import Mouse
 
 # comment out these lines for non_US keyboards
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
@@ -75,6 +76,30 @@ def runScriptLine(line):
 def sendString(line):
     layout.write(line)
 
+def parseMouse(line):
+    if(line[0:4] == "MOVE"):
+        coords = line[5:].split(" ")
+       
+        if(len(coords) == 2):
+            x = int(coords[0])
+            y = int(coords[1])
+            mouse.move(x,y)
+        elif(len(coords) == 3):
+            # mouse wheel
+            x = int(coords[0])
+            y = int(coords[1])
+            wheel = int(coords[2])
+            mouse.move(x,y,wheel)   
+    elif(line[0:5] == "CLICK"):
+        button = int(line[6:])
+        if(button == 1):
+            mouse.click(Mouse.LEFT_BUTTON)
+        elif(button == 2):
+            mouse.click(Mouse.MIDDLE_BUTTON)
+        elif(button == 3):
+            mouse.click(Mouse.MIDDLE_BUTTON)
+
+
 def parseLine(line):
     global defaultDelay
     if(line[0:3] == "REM"):
@@ -97,11 +122,14 @@ def parseLine(line):
             led.value = False
         else:
             led.value = True
+    elif(line[0:5] == "MOUSE"):
+        parseMouse(line[6:])
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
 
 kbd = Keyboard(usb_hid.devices)
+mouse = Mouse(usb_hid.devices)
 layout = KeyboardLayout(kbd)
 
 
