@@ -102,10 +102,39 @@ def ducky_main(request):
 
     return(response)
 
-def cleanup_text(buffer):
-    return_buffer = buffer.replace('+', ' ').replace('%0D%0A', '\n') + '\n'
-    #print(return_buffer)
-    return(return_buffer)
+_hexdig = '0123456789ABCDEFabcdef'
+_hextobyte = None
+
+def cleanup_text(string):
+    """unquote('abc%20def') -> b'abc def'."""
+    global _hextobyte
+
+    if not string:
+        return b''
+
+    if isinstance(string, str):
+        string = string.encode('utf-8')
+
+    bits = string.split(b'%')
+    if len(bits) == 1:
+        return string
+
+    res = [bits[0]]
+    append = res.append
+
+    if _hextobyte is None:
+        _hextobyte = {(a + b).encode(): bytes([int(a + b, 16)])
+                      for a in _hexdig for b in _hexdig}
+
+    for item in bits[1:]:
+        try:
+            append(_hextobyte[item[:2]])
+            append(item[2:])
+        except KeyError:
+            append(b'%')
+            append(item)
+
+    return b''.join(res).decode().replace('+',' ')
 
 web_app = WSGIApp()
 
