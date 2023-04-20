@@ -38,7 +38,7 @@ edit_html = """<!DOCTYPE html>
     <body>
         <form action="/write/{}" method="POST">
             <textarea rows="5" name="scriptData">{}</textarea><br/>
-            <input type="submit" value="Submit"/>
+            <input type="submit" value="submit"/>
         </form>
         <br>
         <a href="/ducky"><button>Home</button></a>
