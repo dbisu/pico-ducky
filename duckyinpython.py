@@ -69,6 +69,22 @@ def convertLine(line):
     # print(newline)
     return newline
 
+def detectOS():
+    inital_state = kbd.led_on(Keyboard.LED_CAPS_LOCK)
+    
+    # Check if windows
+    runScriptLine(convertLine('GUI r'))
+    time.sleep(0.5)
+    sendString('''powershell -Command "(New-Object -com WScript.Shell).SendKeys('{CAPSLOCK}')"''')
+    runScriptLine(convertLine('ENTER'))
+    time.sleep(1)
+
+    if inital_state != kbd.led_on(Keyboard.LED_CAPS_LOCK):
+        return "windows"
+
+    return "other"
+
+
 def changeLang(lang):
     if lang == 'us':
         from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as new_KeyboardLayout
@@ -118,6 +134,9 @@ def parseLine(line):
         KeyboardLayout, Keycode = changeLang(line[5:])
         duckyCommands = define_ducky_commands()
         layout = KeyboardLayout(kbd)
+    elif(line[0:9] == "DETECT_OS"):
+        os = detectOS()
+        sendString(os)
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
