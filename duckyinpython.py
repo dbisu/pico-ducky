@@ -69,6 +69,10 @@ def convertLine(line):
     # print(newline)
     return newline
 
+def parseCondition(condition):
+    return True
+    #return eval(condition) FIXME: Needs to be replaced with a more adequate condition checker
+
 def detectOS():
     inital_state = kbd.led_on(Keyboard.LED_CAPS_LOCK)
     
@@ -110,36 +114,41 @@ def parseLine(line):
     global defaultDelay
     global duckyCommands
     global layout
-    if(line[0:3] == "REM"):
+    if(line.startswith("REM")):
         # ignore ducky script comments
         pass
-    elif(line[0:5] == "DELAY"):
+    elif(line.startswith("DELAY")):
         time.sleep(float(line[6:])/1000)
-    elif(line[0:6] == "STRING"):
+    elif(line.startswith("STRING")):
         sendString(line[7:])
-    elif(line[0:5] == "PRINT"):
+    elif(line.startswith("PRINT")):
         print("[SCRIPT]: " + line[6:])
-    elif(line[0:6] == "IMPORT"):
+    elif(line.startswith("IMPORT")):
         runScript(line[7:])
-    elif(line[0:13] == "DEFAULT_DELAY"):
+    elif(line.startswith("DEFAULT_DELAY")):
         defaultDelay = int(line[14:]) * 10
-    elif(line[0:12] == "DEFAULTDELAY"):
+    elif(line.startswith("DEFAULTDELAY")):
         defaultDelay = int(line[13:]) * 10
-    elif(line[0:3] == "LED"):
+    elif(line.startswith("LED")):
         if(led.value == True):
             led.value = False
         else:
             led.value = True
-    elif(line[0:4] == "LANG"):
+    elif(line.startswith("LANG")):
         KeyboardLayout, Keycode = changeLang(line[5:])
         duckyCommands = define_ducky_commands()
         layout = KeyboardLayout(kbd)
-    elif(line[0:9] == "DETECT_OS"):
+    elif(line.startswith("DETECT_OS")):
         os = detectOS()
         sendString(os)
+    elif(line.startswith("IF")):
+        return parseCondition(line[3:-5])
+    elif(line.startswith("END_IF")):
+        return True
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
+    return False
 
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayout(kbd)
@@ -176,19 +185,26 @@ defaultDelay = 0
 def runScript(file):
     global defaultDelay
 
+    if_false = False
+
     duckyScriptPath = file
     try:
         f = open(duckyScriptPath,"r",encoding='utf-8')
         previousLine = ""
         for line in f:
             line = line.rstrip()
+
+            if if_false and (line != "END_IF" or line != "ELSE"):
+                continue
+
             if(line[0:6] == "REPEAT"):
                 for i in range(int(line[7:])):
                     #repeat the last command
                     parseLine(previousLine)
                     time.sleep(float(defaultDelay)/1000)
             else:
-                parseLine(line)
+                if parseLine(line) == True:
+                    if_false = not if_false
                 previousLine = line
             time.sleep(float(defaultDelay)/1000)
     except OSError as e:
