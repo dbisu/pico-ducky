@@ -191,11 +191,23 @@ def runScript(file):
     try:
         f = open(duckyScriptPath,"r",encoding='utf-8')
         previousLine = ""
-        for line in f:
-            line = line.rstrip()
+        lines = f.lines()
+        i=0
+        while i < len(lines):
+            line = lines[i].rstrip()
 
-            if if_false and (line != "END_IF" or line != "ELSE"):
-                continue
+            if line.startswith('IF'): # missing condition check
+                i += 1
+                while not lines[i].startswith('END_IF') and not lines[i].startswith('ELSE'):
+                    parseLine(lines[i])
+                    i += 1
+                if lines[i].startswith('ELSE'):
+                    while not lines[i].startswith('END_IF'):
+                        i += 1
+                    continue
+                else:
+                    i += 1
+                    continue
 
             if(line[0:6] == "REPEAT"):
                 for i in range(int(line[7:])):
