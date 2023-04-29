@@ -196,13 +196,17 @@ def runScript(file):
         while i < len(lines):
             line = lines[i].rstrip()
 
-            if line.startswith('IF'): # missing condition check
+            if line.startswith('IF'):
+                condition = line.split('(')[1].split(')')[0] # missing condition check
                 i += 1
                 while not lines[i].startswith('END_IF') and not lines[i].startswith('ELSE'):
-                    parseLine(lines[i])
+                    if condition: # missing condition check
+                        parseLine(lines[i])
                     i += 1
                 if lines[i].startswith('ELSE'):
                     while not lines[i].startswith('END_IF'):
+                        if not condition: # missing condition check
+                            parseLine(lines[i])
                         i += 1
                     continue
                 else:
