@@ -182,6 +182,35 @@ def getProgrammingStatus():
 
 defaultDelay = 0
 
+def conditionCheck(condition: str) -> bool: # FIXME: missing variable check
+    if condition.contains('&'):
+        conditions = condition.split('&')
+        for con in conditions:
+            if not conditionCheck(con):
+                return False
+        return True
+    elif condition.contains('|'):
+        conditions = condition.split('|')
+        for con in conditions:
+            if conditionCheck(con):
+                return True
+        return False
+    elif condition.contains('=='):
+        con_split = condition.split('==')
+        return True if con_split[0] == con_split[1] else False
+    elif condition.contains('>='):
+        con_split = condition.split('>=')
+        return True if con_split[0] >= con_split[1] else False
+    elif condition.contains('<='):
+        con_split = condition.split('<=')
+        return True if con_split[0] <= con_split[1] else False
+    elif condition.contains('<'):
+        con_split = condition.split('<')
+        return True if con_split[0] < con_split[1] else False
+    elif condition.contains('>'):
+        con_split = condition.split('>')
+        return True if con_split[0] > con_split[1] else False
+
 def runScript(file):
     global defaultDelay
 
@@ -196,16 +225,21 @@ def runScript(file):
         while i < len(lines):
             line = lines[i].rstrip()
 
-            if line.startswith('IF'):
-                condition = line.split('(')[1].split(')')[0] # missing condition check
+            if line.startswith('IF') or line.startswith('ELSE IF'):
+                condition = line.split('(')[1].split(')')[0]
+                condition_result = conditionCheck(condition)
                 i += 1
                 while not lines[i].startswith('END_IF') and not lines[i].startswith('ELSE'):
-                    if condition: # missing condition check
+                    if condition_result:
                         parseLine(lines[i])
                     i += 1
+                    
+                if lines[i].startswith('ELSE IF') and not condition_result:
+                    continue
+                    
                 if lines[i].startswith('ELSE'):
                     while not lines[i].startswith('END_IF'):
-                        if not condition: # missing condition check
+                        if not condition_result:
                             parseLine(lines[i])
                         i += 1
                     continue
