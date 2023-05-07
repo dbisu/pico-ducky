@@ -14,14 +14,8 @@ import asyncio
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
 
-# comment out these lines for non_US keyboards
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
 from adafruit_hid.keycode import Keycode
-
-# uncomment these lines for non_US keyboards or use LANG command
-# replace LANG with appropriate language
-#from keyboard_layout_win_LANG import KeyboardLayout
-#from keycode_win_LANG import Keycode
 
 def define_ducky_commands():
     return {
@@ -69,10 +63,6 @@ def convertLine(line):
     # print(newline)
     return newline
 
-def parseCondition(condition):
-    return True
-    #return eval(condition) FIXME: Needs to be replaced with a more adequate condition checker
-
 def detectOS():
     inital_state = kbd.led_on(Keyboard.LED_CAPS_LOCK)
     
@@ -102,6 +92,13 @@ def changeLang(lang):
 
     return new_KeyboardLayout, new_Keycode
 
+def saveVar(var):
+    var_name, var_value = var.split('=')
+    if not var_name.startswith('$'):
+        return
+    var_name = var_name[1:]
+    globals()[var_name] = var_value
+
 def runScriptLine(line):
     for k in line:
         kbd.press(k)
@@ -118,33 +115,53 @@ def parseLine(line):
         # ignore ducky script comments
         pass
     elif(line.startswith("DELAY")):
-        time.sleep(float(line[6:])/1000)
+        delay = line[6:]
+        if line[6:].startswith("$"):
+            delay = globals()[line[7:]]
+        time.sleep(float(delay)/1000)
     elif(line.startswith("STRING")):
-        sendString(line[7:])
+        string = line[7:]
+        if line[7:].startswith("$"):
+            string = globals()[line[8:]]
+        sendString(string)
     elif(line.startswith("PRINT")):
-        print("[SCRIPT]: " + line[6:])
+        out = line[6:]
+        if line[6:].startswith("$"):
+            out = globals()[line[7:]]
+        print("[SCRIPT]: " + out)
     elif(line.startswith("IMPORT")):
-        runScript(line[7:])
+        file = line[7:]
+        if line[7:].startswith("$"):
+            file = globals()[line[8:]]
+        runScript(file)
     elif(line.startswith("DEFAULT_DELAY")):
-        defaultDelay = int(line[14:]) * 10
+        delay = line[14:]
+        if line[14:].startswith("$"):
+            delay = globals()[line[15:]]
+        defaultDelay = int(delay) * 10
     elif(line.startswith("DEFAULTDELAY")):
-        defaultDelay = int(line[13:]) * 10
+        delay = line[13:]
+        if(line[13:].startswith("$")):
+            delay = globals()[line[14:]]
+        defaultDelay = int(delay) * 10
     elif(line.startswith("LED")):
         if(led.value == True):
             led.value = False
         else:
             led.value = True
     elif(line.startswith("LANG")):
-        KeyboardLayout, Keycode = changeLang(line[5:])
+        KeyboardLayout, _ = changeLang(line[5:])
         duckyCommands = define_ducky_commands()
         layout = KeyboardLayout(kbd)
     elif(line.startswith("DETECT_OS")):
         os = detectOS()
         sendString(os)
     elif(line.startswith("IF")):
-        return parseCondition(line[3:-5])
+        return conditionCheck(line[3:-5].replace(" ", ""))
     elif(line.startswith("END_IF")):
         return True
+    elif(line.startswith("VAR")):
+        saveVar(line[4:])
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
@@ -182,7 +199,7 @@ def getProgrammingStatus():
 
 defaultDelay = 0
 
-def conditionCheck(condition: str) -> bool: # FIXME: missing variable check
+def conditionCheck(condition: str) -> bool:
     if condition.contains('&'):
         conditions = condition.split('&')
         for con in conditions:
@@ -195,21 +212,42 @@ def conditionCheck(condition: str) -> bool: # FIXME: missing variable check
             if conditionCheck(con):
                 return True
         return False
-    elif condition.contains('=='):
-        con_split = condition.split('==')
-        return True if con_split[0] == con_split[1] else False
-    elif condition.contains('>='):
-        con_split = condition.split('>=')
-        return True if con_split[0] >= con_split[1] else False
-    elif condition.contains('<='):
-        con_split = condition.split('<=')
-        return True if con_split[0] <= con_split[1] else False
-    elif condition.contains('<'):
-        con_split = condition.split('<')
-        return True if con_split[0] < con_split[1] else False
-    elif condition.contains('>'):
-        con_split = condition.split('>')
-        return True if con_split[0] > con_split[1] else False
+    else:
+        if condition.contains('=='):
+            con_split = condition.split('==')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] == con_split[1] else False
+        
+        elif condition.contains('!='):
+            con_split = condition.split('!=')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] != con_split[1] else False
+
+        elif condition.contains('>='):
+            con_split = condition.split('>=')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] >= con_split[1] else False
+        
+        elif condition.contains('<='):
+            con_split = condition.split('<=')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] <= con_split[1] else False
+        
+        elif condition.contains('<'):
+            con_split = condition.split('<')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] < con_split[1] else False
+        
+        elif condition.contains('>'):
+            con_split = condition.split('>')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] > con_split[1] else False
 
 def runScript(file):
     global defaultDelay
