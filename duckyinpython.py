@@ -99,6 +99,13 @@ def saveVar(var):
     var_name = var_name[1:]
     globals()[var_name] = var_value
 
+def saveConst(var):
+    var_name, var_value = var.split('=')
+    if not var_name.startswith('#'):
+        return
+    var_name = var_name[1:]
+    globals()[var_name] = var_value
+
 def runScriptLine(line):
     for k in line:
         kbd.press(k)
@@ -162,6 +169,8 @@ def parseLine(line):
         return True
     elif(line.startswith("VAR")):
         saveVar(line[4:])
+    elif(line.starswith("CONST")):
+        saveConst(line[6:])
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
