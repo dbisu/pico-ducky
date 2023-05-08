@@ -14,14 +14,8 @@ import asyncio
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
 
-# comment out these lines for non_US keyboards
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
 from adafruit_hid.keycode import Keycode
-
-# uncomment these lines for non_US keyboards or use LANG command
-# replace LANG with appropriate language
-#from keyboard_layout_win_LANG import KeyboardLayout
-#from keycode_win_LANG import Keycode
 
 def define_ducky_commands():
     return {
@@ -69,6 +63,22 @@ def convertLine(line):
     # print(newline)
     return newline
 
+def detectOS():
+    inital_state = kbd.led_on(Keyboard.LED_CAPS_LOCK)
+    
+    # Check if windows
+    runScriptLine(convertLine('GUI r'))
+    time.sleep(0.5)
+    sendString('''powershell -Command "(New-Object -com WScript.Shell).SendKeys('{CAPSLOCK}')"''')
+    runScriptLine(convertLine('ENTER'))
+    time.sleep(1)
+
+    if inital_state != kbd.led_on(Keyboard.LED_CAPS_LOCK):
+        return "windows"
+
+    return "other"
+
+
 def changeLang(lang):
     if lang == 'us':
         from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as new_KeyboardLayout
@@ -82,6 +92,20 @@ def changeLang(lang):
 
     return new_KeyboardLayout, new_Keycode
 
+def saveVar(var):
+    var_name, var_value = var.split('=')
+    if not var_name.startswith('$'):
+        return
+    var_name = var_name[1:]
+    globals()[var_name] = var_value
+
+def saveConst(var):
+    var_name, var_value = var.split('=')
+    if not var_name.startswith('#'):
+        return
+    var_name = var_name[1:]
+    globals()[var_name] = var_value
+
 def runScriptLine(line):
     for k in line:
         kbd.press(k)
@@ -94,33 +118,63 @@ def parseLine(line):
     global defaultDelay
     global duckyCommands
     global layout
-    if(line[0:3] == "REM"):
+    if(line.startswith("REM")):
         # ignore ducky script comments
         pass
-    elif(line[0:5] == "DELAY"):
-        time.sleep(float(line[6:])/1000)
-    elif(line[0:6] == "STRING"):
-        sendString(line[7:])
-    elif(line[0:5] == "PRINT"):
-        print("[SCRIPT]: " + line[6:])
-    elif(line[0:6] == "IMPORT"):
-        runScript(line[7:])
-    elif(line[0:13] == "DEFAULT_DELAY"):
-        defaultDelay = int(line[14:]) * 10
-    elif(line[0:12] == "DEFAULTDELAY"):
-        defaultDelay = int(line[13:]) * 10
-    elif(line[0:3] == "LED"):
+    elif(line.startswith("DELAY")):
+        delay = line[6:]
+        if line[6:].startswith("$"):
+            delay = globals()[line[7:]]
+        time.sleep(float(delay)/1000)
+    elif(line.startswith("STRING")):
+        string = line[7:]
+        if line[7:].startswith("$"):
+            string = globals()[line[8:]]
+        sendString(string)
+    elif(line.startswith("PRINT")):
+        out = line[6:]
+        if line[6:].startswith("$"):
+            out = globals()[line[7:]]
+        print("[SCRIPT]: " + out)
+    elif(line.startswith("IMPORT")):
+        file = line[7:]
+        if line[7:].startswith("$"):
+            file = globals()[line[8:]]
+        runScript(file)
+    elif(line.startswith("DEFAULT_DELAY")):
+        delay = line[14:]
+        if line[14:].startswith("$"):
+            delay = globals()[line[15:]]
+        defaultDelay = int(delay) * 10
+    elif(line.startswith("DEFAULTDELAY")):
+        delay = line[13:]
+        if(line[13:].startswith("$")):
+            delay = globals()[line[14:]]
+        defaultDelay = int(delay) * 10
+    elif(line.startswith("LED")):
         if(led.value == True):
             led.value = False
         else:
             led.value = True
-    elif(line[0:4] == "LANG"):
-        KeyboardLayout, Keycode = changeLang(line[5:])
+    elif(line.startswith("LANG")):
+        KeyboardLayout, _ = changeLang(line[5:])
         duckyCommands = define_ducky_commands()
         layout = KeyboardLayout(kbd)
+    elif(line.startswith("DETECT_OS")):
+        os = detectOS()
+        sendString(os)
+    elif(line.startswith("IF")):
+        return conditionCheck(line[3:-5].replace(" ", ""))
+    elif(line.startswith("END_IF")):
+        return True
+    elif(line.startswith("VAR")):
+        saveVar(line[4:])
+    elif(line.starswith("CONST")):
+        saveConst(line[6:])
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
+    return False
 
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayout(kbd)
@@ -154,22 +208,100 @@ def getProgrammingStatus():
 
 defaultDelay = 0
 
+def conditionCheck(condition: str) -> bool:
+    if condition.contains('&'):
+        conditions = condition.split('&')
+        for con in conditions:
+            if not conditionCheck(con):
+                return False
+        return True
+    elif condition.contains('|'):
+        conditions = condition.split('|')
+        for con in conditions:
+            if conditionCheck(con):
+                return True
+        return False
+    else:
+        if condition.contains('=='):
+            con_split = condition.split('==')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] == con_split[1] else False
+        
+        elif condition.contains('!='):
+            con_split = condition.split('!=')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] != con_split[1] else False
+
+        elif condition.contains('>='):
+            con_split = condition.split('>=')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] >= con_split[1] else False
+        
+        elif condition.contains('<='):
+            con_split = condition.split('<=')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] <= con_split[1] else False
+        
+        elif condition.contains('<'):
+            con_split = condition.split('<')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] < con_split[1] else False
+        
+        elif condition.contains('>'):
+            con_split = condition.split('>')
+            if con_split[0].startswith('$'):
+                con_split[0] = globals()[con_split[0][1:]]
+            return True if con_split[0] > con_split[1] else False
+
 def runScript(file):
     global defaultDelay
+
+    if_false = False
 
     duckyScriptPath = file
     try:
         f = open(duckyScriptPath,"r",encoding='utf-8')
         previousLine = ""
-        for line in f:
-            line = line.rstrip()
+        lines = f.lines()
+        i=0
+        while i < len(lines):
+            line = lines[i].rstrip()
+
+            if line.startswith('IF') or line.startswith('ELSE IF'):
+                condition = line.split('(')[1].split(')')[0]
+                condition_result = conditionCheck(condition)
+                i += 1
+                while not lines[i].startswith('END_IF') and not lines[i].startswith('ELSE'):
+                    if condition_result:
+                        parseLine(lines[i])
+                    i += 1
+                    
+                if lines[i].startswith('ELSE IF') and not condition_result:
+                    continue
+                    
+                if lines[i].startswith('ELSE'):
+                    while not lines[i].startswith('END_IF'):
+                        if not condition_result:
+                            parseLine(lines[i])
+                        i += 1
+                    continue
+                else:
+                    i += 1
+                    continue
+
             if(line[0:6] == "REPEAT"):
                 for i in range(int(line[7:])):
                     #repeat the last command
                     parseLine(previousLine)
                     time.sleep(float(defaultDelay)/1000)
             else:
-                parseLine(line)
+                if parseLine(line) == True:
+                    if_false = not if_false
                 previousLine = line
             time.sleep(float(defaultDelay)/1000)
     except OSError as e:
