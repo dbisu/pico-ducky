@@ -19,7 +19,7 @@
 ## Quick Start Guide
 Install and have your USB Rubber Ducky working in less than 5 minutes.
 
-1. Start on the [Releases](https://github.com/dbisu/pico-ducky/releases) page.
+1. Download the latest release from the [Releases](https://github.com/dbisu/pico-ducky/releases) page.
 
 2. Plug the device into a USB port while holding the boot button. It will show up as a removable media device named RPI-RP2.
 
