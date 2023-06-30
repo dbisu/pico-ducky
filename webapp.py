@@ -172,8 +172,8 @@ def write_script(request, filename):
     textbuffer = form_data['scriptData']
     textbuffer = cleanup_text(textbuffer)
     #print(textbuffer)
-    for line in textbuffer:
-        f.write(line)
+    for line in textbuffer.splitlines():
+        f.write(line + '\n')
     f.close()
     storage.remount("/",readonly=True)
     response = response_html.format("Wrote script " + filename)
