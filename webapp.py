@@ -209,9 +209,10 @@ def write_new_script(request):
 @web_app.route("/delete/<filename>")
 def delete(request, filename):
     print("Deleting ", filename)
+    storage.remount("/",readonly=False)
     os.remove(filename)
     response = response_html.format("Deleted script " + filename)
-
+    storage.remount("/",readonly=True)
     return("200 OK",[('Content-Type', 'text/html')], response)
 
 @web_app.route("/run/<filename>")
