@@ -232,7 +232,7 @@ async def startWebService():
     PORT = 80        # Port to listen on
     print(HOST,PORT)
 
-    wsgiServer = server.WSGIServer(80, application=web_app)
+    wsgiServer = server.WSGIServer(PORT, application=web_app)
 
     print(f"open this IP in your browser: http://{HOST}:{PORT}/")
 
