@@ -8,14 +8,6 @@ import board
 import digitalio
 import storage
 
-noStorage = False
-noStoragePin = digitalio.DigitalInOut(GP15)
-noStoragePin.switch_to_input(pull=digitalio.Pull.UP)
-noStorageStatus = noStoragePin.value
-
-# If GP15 is not connected, it will default to being pulled high (True)
-# If GP is connected to GND, it will be low (False)
-
 if(noStorage == True):
     # don't show USB drive to host PC
     storage.disable_usb_drive()
