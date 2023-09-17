@@ -12,6 +12,7 @@ import wsgiserver as server
 from adafruit_wsgi.wsgi_app import WSGIApp
 import wifi
 
+import duckyinpython
 from duckyinpython import *
 
 payload_html = """<!DOCTYPE html>
@@ -209,7 +210,8 @@ def run_script(request, filename):
     print("run_script ", filename)
     response = response_html.format("Running script " + filename)
     #print(response)
-    runScript(filename)
+    #runScript(filename)
+    duckyinpython.fileToRun = filename
     return("200 OK",[('Content-Type', 'text/html')], response)
 
 @web_app.route("/")
@@ -223,7 +225,8 @@ def run_script(request, filenumber):
     print("run_script ", filenumber)
     response = response_html.format("Running script " + filename)
     #print(response)
-    runScript(filename)
+    #runScript(filename)
+    duckyinpython.fileToRun = filename
     return("200 OK",[('Content-Type', 'text/html')], response)
 
 async def startWebService():

@@ -80,8 +80,8 @@ def parseLine(line):
     if(line[0:3] == "REM"):
         # ignore ducky script comments
         pass
-    elif(line[0:5] == "DELAY"):
-        time.sleep(float(line[6:])/1000)
+    #elif(line[0:5] == "DELAY"):
+    #    time.sleep(float(line[6:])/1000)
     elif(line[0:6] == "STRING"):
         sendString(line[7:])
     elif(line[0:5] == "PRINT"):
@@ -133,26 +133,44 @@ def getProgrammingStatus():
 
 defaultDelay = 0
 
-def runScript(file):
-    global defaultDelay
+async def runScriptTask():
+    global defaultDelay, fileToRun
+    print("starting runScript")
+    while True:
+        #print("Checking for file", fileToRun)
+        if fileToRun is not None:
+            duckyScriptPath = fileToRun
+            print("starting",duckyScriptPath)
+            with open(duckyScriptPath,"r",encoding='utf-8') as f:
 
-    duckyScriptPath = file
-    try:
-        f = open(duckyScriptPath,"r",encoding='utf-8')
-        previousLine = ""
-        for line in f:
-            line = line.rstrip()
-            if(line[0:6] == "REPEAT"):
-                for i in range(int(line[7:])):
-                    #repeat the last command
-                    parseLine(previousLine)
-                    time.sleep(float(defaultDelay)/1000)
-            else:
-                parseLine(line)
-                previousLine = line
-            time.sleep(float(defaultDelay)/1000)
-    except OSError as e:
-        print("Unable to open file ", file)
+                previousLine = ""
+                for line in f:
+                    line = line.rstrip()
+                    if(line[0:6] == "REPEAT"):
+                        for i in range(int(line[7:])):
+                            #repeat the last command
+                            parseLine(previousLine)
+                            await asyncio.sleep_ms(defaultDelay)
+                    elif(line[0:5] == "DELAY"):
+                        delay = int(line[6:])
+                        #print("sleeping for ",delay)
+                        #print(type(delay))
+                        await asyncio.sleep_ms(delay)
+                        previousLine = line
+                    else:
+                        #print("parsing line", line)
+                        parseLine(line)
+                        previousLine = line
+                        #print("sleeping",defaultDelay)
+                        await asyncio.sleep_ms(defaultDelay)
+                        #print("done sleeping")
+
+            print("ending",duckyScriptPath)
+
+            fileToRun = None
+        await asyncio.sleep(1)
+
+    print("ending runScript")
 
 def selectPayload():
     global payload1Pin, payload2Pin, payload3Pin, payload4Pin
@@ -234,7 +252,7 @@ async def blink_pico_w_led(led):
         await asyncio.sleep(0.5)
 
 async def monitor_buttons(button1):
-    global inBlinkeyMode, inMenu, enableRandomBeep, enableSirenMode,pixel
+    global inBlinkeyMode, inMenu, enableRandomBeep, enableSirenMode,pixel, fileToRun
     print("starting monitor_buttons")
     button1Down = False
     while True:
@@ -257,7 +275,8 @@ async def monitor_buttons(button1):
                 # Run selected payload
                 payload = selectPayload()
                 print("Running ", payload)
-                runScript(payload)
+                #runScript(payload)
+                fileToRun = payload
                 print("Done")
             button1Down = False
 

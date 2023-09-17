@@ -11,6 +11,7 @@ import time
 import digitalio
 from board import *
 import board
+import duckyinpython
 from duckyinpython import *
 if(board.board_id == 'raspberry_pi_pico_w'):
     import wifi
@@ -56,7 +57,8 @@ if(progStatus == False):
     # not in setup mode, inject the payload
     payload = selectPayload()
     print("Running ", payload)
-    runScript(payload)
+    #runScript(payload)
+    duckyinpython.fileToRun = payload
 
     print("Done")
 else:
@@ -68,15 +70,16 @@ async def main_loop():
     global led,button1
 
     button_task = asyncio.create_task(monitor_buttons(button1))
+    script_task = asyncio.create_task(runScriptTask())
     if(board.board_id == 'raspberry_pi_pico_w'):
         pico_led_task = asyncio.create_task(blink_pico_w_led(led))
         print("Starting Wifi")
         startWiFi()
         print("Starting Web Service")
         webservice_task = asyncio.create_task(startWebService())
-        await asyncio.gather(pico_led_task, button_task, webservice_task)
+        await asyncio.gather(pico_led_task, button_task, webservice_task, script_task)
     else:
         pico_led_task = asyncio.create_task(blink_pico_led(led))
-        await asyncio.gather(pico_led_task, button_task)
+        await asyncio.gather(pico_led_task, button_task, script_task)
 
 asyncio.run(main_loop())
