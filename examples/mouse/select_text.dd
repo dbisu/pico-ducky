@@ -1,4 +1,4 @@
-REM Test mouse click and movement
+REM Select something on the screen
 
 MOUSE PRESS LEFT
 MOUSE MOVE 100,100

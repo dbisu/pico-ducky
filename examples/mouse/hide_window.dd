@@ -1,4 +1,4 @@
-REM The next four lines open Notepad in Windows and type "Hello World!"
+REM Open the CMD and move it to the bottom of the screen
 GUI r
 DELAY 500
 STRING cmd
@@ -10,5 +10,5 @@ STRING s
 DELAY 100
 DOWNARROW
 DELAY 100
-MOUSE MOVE 0,500
+MOUSE MOVE 0,1500
 ENTER
