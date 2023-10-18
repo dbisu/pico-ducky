@@ -1,0 +1,6 @@
+REM Test mouse click and movement
+
+MOUSE PRESS LEFT
+MOUSE MOVE 100,100
+MOUSE RELEASE LEFT
+

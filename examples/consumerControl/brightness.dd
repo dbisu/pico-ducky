@@ -1,0 +1,14 @@
+REM Make the monitor as dark as possible while the
+REM payload is running, then set it to maximum brightness.
+
+REM The system needs a bit of time to adjust the brightness
+DEFAULT_DELAY 200
+
+CC BRIGHTNESS_DECREMENT
+REPEAT 9
+
+REM Payload Script Here
+DELAY 2000
+
+CC BRIGHTNESS_INCREMENT
+REPEAT 9

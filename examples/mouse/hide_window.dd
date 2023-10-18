@@ -1,0 +1,14 @@
+REM The next four lines open Notepad in Windows and type "Hello World!"
+GUI r
+DELAY 500
+STRING cmd
+ENTER
+DELAY 1000
+ALT SPACE
+DELAY 100
+STRING s
+DELAY 100
+DOWNARROW
+DELAY 100
+MOUSE MOVE 0,500
+ENTER

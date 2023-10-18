@@ -11,8 +11,12 @@ import board
 from board import *
 import pwmio
 import asyncio
+
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.mouse import Mouse
+from adafruit_hid.consumer_control import ConsumerControl
+from adafruit_hid.consumer_control_code import ConsumerControlCode
 
 # comment out these lines for non_US keyboards
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
@@ -47,6 +51,36 @@ duckyCommands = {
     'F12': Keycode.F12,
 
 }
+
+kbd = Keyboard(usb_hid.devices)
+layout = KeyboardLayout(kbd)
+
+mouse = Mouse(usb_hid.devices)
+cc = ConsumerControl(usb_hid.devices)
+
+#init button
+button1_pin = DigitalInOut(GP22) # defaults to input
+button1_pin.pull = Pull.UP      # turn on internal pull-up resistor
+button1 =  Debouncer(button1_pin)
+
+#init payload selection switch
+payload1Pin = digitalio.DigitalInOut(GP4)
+payload1Pin.switch_to_input(pull=digitalio.Pull.UP)
+payload2Pin = digitalio.DigitalInOut(GP5)
+payload2Pin.switch_to_input(pull=digitalio.Pull.UP)
+payload3Pin = digitalio.DigitalInOut(GP10)
+payload3Pin.switch_to_input(pull=digitalio.Pull.UP)
+payload4Pin = digitalio.DigitalInOut(GP11)
+payload4Pin.switch_to_input(pull=digitalio.Pull.UP)
+
+defaultDelay = 0
+
+if(board.board_id == 'raspberry_pi_pico'):
+    led = pwmio.PWMOut(board.LED, frequency=5000, duty_cycle=0)
+elif(board.board_id == 'raspberry_pi_pico_w'):
+    led = digitalio.DigitalInOut(board.LED)
+    led.switch_to_output()
+
 def convertLine(line):
     newline = []
     # print(line)
@@ -75,52 +109,77 @@ def runScriptLine(line):
 def sendString(line):
     layout.write(line)
 
+def parseMouseCommand(line):
+    if line.startswith('CLICK'):
+        if line[6:] == 'LEFT':
+            mouse.click(Mouse.LEFT_BUTTON)
+        elif line[6:] == 'RIGHT':
+            mouse.click(Mouse.RIGHT_BUTTON)
+        elif hasattr(Mouse, line[6:]):
+            mouse.click(getattr(Mouse, line[6:]))
+
+    elif line.startswith('MOVE'):
+        x, y = line[5:].split(',')
+        x, y = int(x), int(y)
+
+        mouse.move(x, y)
+    elif line.startswith('WHEEL'):
+        wheel = int(line[5:])
+        mouse.move(wheel=wheel)
+
+    elif line.startswith('PRESS'):
+        if line[6:] == 'LEFT':
+            mouse.press(Mouse.LEFT_BUTTON)
+        elif line[6:] == 'RIGHT':
+            mouse.press(Mouse.RIGHT_BUTTON)
+        elif hasattr(Mouse, line[6:]):
+            mouse.press(getattr(Mouse, line[6:]))
+
+    elif line.startswith('RELEASE'):
+        if line[8:] == 'LEFT':
+            mouse.release(Mouse.LEFT_BUTTON)
+        elif line[8:] == 'RIGHT':
+            mouse.release(Mouse.RIGHT_BUTTON)
+        elif hasattr(Mouse, line[8:]):
+            mouse.release(getattr(Mouse, line[8:]))
+
 def parseLine(line):
     global defaultDelay
-    if(line[0:3] == "REM"):
-        # ignore ducky script comments
-        pass
-    elif(line[0:5] == "DELAY"):
+    
+    if line.startswith("REM"):
+        pass # ignore ducky script comment
+
+    elif line.startswith("DELAY"):
         time.sleep(float(line[6:])/1000)
-    elif(line[0:6] == "STRING"):
+    
+    elif line.startswith("STRING"):
         sendString(line[7:])
-    elif(line[0:5] == "PRINT"):
+    
+    elif line.startswith("MOUSE"):
+        parseMouseCommand(line[6:])
+    
+    elif line.startswith("CC"):
+        CC_KEY = line[3:]
+        if hasattr(ConsumerControlCode, CC_KEY):
+            cc.send(getattr(ConsumerControlCode, CC_KEY))
+
+    elif line.startswith("PRINT"):
         print("[SCRIPT]: " + line[6:])
-    elif(line[0:6] == "IMPORT"):
+
+    elif line.startswith("IMPORT"):
         runScript(line[7:])
-    elif(line[0:13] == "DEFAULT_DELAY"):
-        defaultDelay = int(line[14:]) * 10
-    elif(line[0:12] == "DEFAULTDELAY"):
-        defaultDelay = int(line[13:]) * 10
-    elif(line[0:3] == "LED"):
-        if(led.value == True):
-            led.value = False
-        else:
-            led.value = True
+    
+    elif line.startswith("DEFAULT_DELAY"):
+        defaultDelay = int(line[14:])
+    
+    elif line.startswith("DEFAULTDELAY"):
+        defaultDelay = int(line[13:])
+
+    elif line.startswith("LED"):
+        led.value = not led.value
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
-
-kbd = Keyboard(usb_hid.devices)
-layout = KeyboardLayout(kbd)
-
-
-
-
-#init button
-button1_pin = DigitalInOut(GP22) # defaults to input
-button1_pin.pull = Pull.UP      # turn on internal pull-up resistor
-button1 =  Debouncer(button1_pin)
-
-#init payload selection switch
-payload1Pin = digitalio.DigitalInOut(GP4)
-payload1Pin.switch_to_input(pull=digitalio.Pull.UP)
-payload2Pin = digitalio.DigitalInOut(GP5)
-payload2Pin.switch_to_input(pull=digitalio.Pull.UP)
-payload3Pin = digitalio.DigitalInOut(GP10)
-payload3Pin.switch_to_input(pull=digitalio.Pull.UP)
-payload4Pin = digitalio.DigitalInOut(GP11)
-payload4Pin.switch_to_input(pull=digitalio.Pull.UP)
 
 def getProgrammingStatus():
     # check GP0 for setup mode
@@ -129,9 +188,6 @@ def getProgrammingStatus():
     progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
     progStatus = not progStatusPin.value
     return(progStatus)
-
-
-defaultDelay = 0
 
 def runScript(file):
     global defaultDelay
@@ -167,16 +223,16 @@ def selectPayload():
     payload3State = not payload3Pin.value
     payload4State = not payload4Pin.value
 
-    if(payload1State == True):
+    if payload1State:
         payload = "payload.dd"
 
-    elif(payload2State == True):
+    elif payload2State:
         payload = "payload2.dd"
 
-    elif(payload3State == True):
+    elif payload3State:
         payload = "payload3.dd"
 
-    elif(payload4State == True):
+    elif payload4State:
         payload = "payload4.dd"
 
     else:
@@ -186,14 +242,7 @@ def selectPayload():
 
     return payload
 
-async def blink_led(led):
-    print("Blink")
-    if(board.board_id == 'raspberry_pi_pico'):
-        blink_pico_led(led)
-    elif(board.board_id == 'raspberry_pi_pico_w'):
-        blink_pico_w_led(led)
-
-async def blink_pico_led(led):
+async def blink_pico_led():
     print("starting blink_pico_led")
     led_state = False
     while True:
@@ -217,7 +266,7 @@ async def blink_pico_led(led):
             led_state = True
         await asyncio.sleep(0)
 
-async def blink_pico_w_led(led):
+async def blink_pico_w_led():
     print("starting blink_pico_w_led")
     led_state = False
     while True:
