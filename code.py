@@ -2,23 +2,44 @@
 # copyright (c) 2023  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
 # Pico and Pico W board support
-
+# Beta Trinkey QT2040 support
 
 import supervisor
-
-
 import time
 import digitalio
-from board import *
 import board
 from duckyinpython import *
 if(board.board_id == 'raspberry_pi_pico_w'):
     import wifi
     from webapp import *
 
+# Wait half a second to allow the device to be recognized by the host computer 
+wait_time = time.monotonic() + .5
 
-# sleep at the start to allow the device to be recognized by the host computer
-time.sleep(.5)
+# turn off automatically reloading when files are written to the pico
+#supervisor.disable_autoreload()
+supervisor.runtime.autoreload = False
+
+payload = None
+progStatus = False
+progStatus = getProgrammingStatus()
+print("progStatus", progStatus)
+if(progStatus == False):
+    print("Finding payload")
+    # not in setup mode, inject the payload
+    payload = selectPayload()
+else:
+    print("Update your payload")
+
+# Wait for the half second timeout to expire before running the payload
+while time.monotonic() < wait_time:
+    pass
+
+# If we are not in setup mode, run the payload
+if progStatus == False:
+    print("Running ", payload)
+    runScript(payload)
+    print("Done")
 
 def startWiFi():
     import ipaddress
@@ -37,46 +58,19 @@ def startWiFi():
     PORT = 80        # Port to listen on
     print(HOST,PORT)
 
-# turn off automatically reloading when files are written to the pico
-#supervisor.disable_autoreload()
-supervisor.runtime.autoreload = False
-
-if(board.board_id == 'raspberry_pi_pico'):
-    led = pwmio.PWMOut(board.LED, frequency=5000, duty_cycle=0)
-elif(board.board_id == 'raspberry_pi_pico_w'):
-    led = digitalio.DigitalInOut(board.LED)
-    led.switch_to_output()
-
-
-progStatus = False
-progStatus = getProgrammingStatus()
-print("progStatus", progStatus)
-if(progStatus == False):
-    print("Finding payload")
-    # not in setup mode, inject the payload
-    payload = selectPayload()
-    print("Running ", payload)
-    runScript(payload)
-
-    print("Done")
-else:
-    print("Update your payload")
-
-led_state = False
-
 async def main_loop():
-    global led,button1
-
-    button_task = asyncio.create_task(monitor_buttons(button1))
+    tasks = []
+    button_task = asyncio.create_task(monitor_buttons())
+    tasks.append(button_task)
+    led_task = asyncio.create_task(blink_led())
+    tasks.append(led_task)
     if(board.board_id == 'raspberry_pi_pico_w'):
-        pico_led_task = asyncio.create_task(blink_pico_w_led(led))
         print("Starting Wifi")
         startWiFi()
         print("Starting Web Service")
         webservice_task = asyncio.create_task(startWebService())
-        await asyncio.gather(pico_led_task, button_task, webservice_task)
-    else:
-        pico_led_task = asyncio.create_task(blink_pico_led(led))
-        await asyncio.gather(pico_led_task, button_task)
+        tasks.append(webservice_task)
+    # Pass the task list as *args to wait for them all to complete
+    await asyncio.gather(*tasks)
 
 asyncio.run(main_loop())
