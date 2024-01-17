@@ -251,3 +251,9 @@ You can find the tool [here](https://github.com/raspberrydeveloper/pyducky)
 [USB Rubber Ducky playlist by **Hak5**](https://www.youtube.com/playlist?list=PLW5y1tjAOzI0YaJslcjcI4zKI366tMBYk)
 
 [CircuitPython tutorial on the Raspberry Pi Pico by **DroneBot Workshop**](https://www.youtube.com/watch?v=07vG-_CcDG0)
+
+
+## Related Projects
+
+[Defcon31-ducky](https://github.com/iot-pwn/defcon31-ducky)  
+There are still a few of these available to purchase, US only.
