@@ -15,19 +15,23 @@ import usb_hid
 from adafruit_hid.keyboard import Keyboard
 
 
-langSwitchPin1 = not digitalio.DigitalInOut(board.GP18).switch_to_input(pull=digitalio.Pull.UP).value
-langSwitchPin2 = not digitalio.DigitalInOut(board.GP19).switch_to_input(pull=digitalio.Pull.UP).value
-langSwitchPin3 = not digitalio.DigitalInOut(board.GP20).switch_to_input(pull=digitalio.Pull.UP).value
-langSwitchPin4 = not digitalio.DigitalInOut(board.GP21).switch_to_input(pull=digitalio.Pull.UP).value
+langSwitchPin1 = digitalio.DigitalInOut(board.GP18)
+langSwitchPin1.switch_to_input(pull=digitalio.Pull.UP)
+langSwitchPin2 = digitalio.DigitalInOut(board.GP19)
+langSwitchPin2.switch_to_input(pull=digitalio.Pull.UP)
+langSwitchPin3 = digitalio.DigitalInOut(board.GP20)
+langSwitchPin3.switch_to_input(pull=digitalio.Pull.UP)
+langSwitchPin4 = digitalio.DigitalInOut(board.GP21)
+langSwitchPin4.switch_to_input(pull=digitalio.Pull.UP)
 
 # define your layouts here
-if langSwitchPin1:
-    from adafruit_hid.keyboard_layout_win_cz import KeyboardLayout
-elif langSwitchPin2:
-    from adafruit_hid.keyboard_layout_win_cz1 import KeyboardLayout
-elif langSwitchPin3:
+if not langSwitchPin1.value:
+    from adafruit_hid.keyboard_layout_win_cz import KeyboardLayout # qwertz
+elif not langSwitchPin2.value:
+    from adafruit_hid.keyboard_layout_win_cz1 import KeyboardLayout # qwerty
+elif not langSwitchPin3.value:
     from adafruit_hid.keyboard_layout_win_uk import KeyboardLayout
-elif langSwitchPin4:
+elif not langSwitchPin4.value:
     from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
 else:
     from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
