@@ -14,8 +14,28 @@ import asyncio
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
 
-# comment out these lines for non_US keyboards
-from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
+
+langSwitchPin1 = digitalio.DigitalInOut(board.GP18)
+langSwitchPin1.switch_to_input(pull=digitalio.Pull.UP)
+langSwitchPin2 = digitalio.DigitalInOut(board.GP19)
+langSwitchPin2.switch_to_input(pull=digitalio.Pull.UP)
+langSwitchPin3 = digitalio.DigitalInOut(board.GP20)
+langSwitchPin3.switch_to_input(pull=digitalio.Pull.UP)
+langSwitchPin4 = digitalio.DigitalInOut(board.GP21)
+langSwitchPin4.switch_to_input(pull=digitalio.Pull.UP)
+
+# define your layouts here
+if not langSwitchPin1.value:
+    from adafruit_hid.keyboard_layout_win_cz import KeyboardLayout # qwertz
+elif not langSwitchPin2.value:
+    from adafruit_hid.keyboard_layout_win_cz1 import KeyboardLayout # qwerty
+elif not langSwitchPin3.value:
+    from adafruit_hid.keyboard_layout_win_uk import KeyboardLayout
+elif not langSwitchPin4.value:
+    from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
+else:
+    from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
+
 from adafruit_hid.keycode import Keycode
 
 # uncomment these lines for non_US keyboards
@@ -125,15 +145,6 @@ button1_pin = DigitalInOut(GP22) # defaults to input
 button1_pin.pull = Pull.UP      # turn on internal pull-up resistor
 button1 =  Debouncer(button1_pin)
 
-#init payload selection switch
-payload1Pin = digitalio.DigitalInOut(GP4)
-payload1Pin.switch_to_input(pull=digitalio.Pull.UP)
-payload2Pin = digitalio.DigitalInOut(GP5)
-payload2Pin.switch_to_input(pull=digitalio.Pull.UP)
-payload3Pin = digitalio.DigitalInOut(GP10)
-payload3Pin.switch_to_input(pull=digitalio.Pull.UP)
-payload4Pin = digitalio.DigitalInOut(GP11)
-payload4Pin.switch_to_input(pull=digitalio.Pull.UP)
 
 def getProgrammingStatus():
     # check GP0 for setup mode
@@ -168,36 +179,16 @@ def runScript(file):
         print("Unable to open file ", file)
 
 def selectPayload():
-    global payload1Pin, payload2Pin, payload3Pin, payload4Pin
-    payload = "payload.dd"
-    # check switch status
-    # payload1 = GPIO4 to GND
-    # payload2 = GPIO5 to GND
-    # payload3 = GPIO10 to GND
-    # payload4 = GPIO11 to GND
-    payload1State = not payload1Pin.value
-    payload2State = not payload2Pin.value
-    payload3State = not payload3Pin.value
-    payload4State = not payload4Pin.value
-
-    if(payload1State == True):
-        payload = "payload.dd"
-
-    elif(payload2State == True):
-        payload = "payload2.dd"
-
-    elif(payload3State == True):
-        payload = "payload3.dd"
-
-    elif(payload4State == True):
-        payload = "payload4.dd"
-
-    else:
-        # if all pins are high, then no switch is present
-        # default to payload1
-        payload = "payload.dd"
-
-    return payload
+    fileNameFormat = "payloads/payload%d.dd"
+    fileNumber = 0
+    limit = 15
+    readPins = [board.GP5, board.GP4, board.GP3, board.GP2]
+    for pin in readPins:
+        pinValue = digitalio.DigitalInOut(pin)
+        pinValue.switch_to_input(pull=digitalio.Pull.UP)
+        fileNumber <<= 1
+        fileNumber += pinValue.value
+    return fileNameFormat % (limit - fileNumber)
 
 async def blink_led(led):
     print("Blink")

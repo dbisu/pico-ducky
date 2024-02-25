@@ -149,16 +149,19 @@ Pico W: The default mode is USB mass storage **disabled**
 ## Multiple payloads
 
 Multiple payloads can be stored on the Pico and Pico W.  
-To select a payload, ground one of these pins:
-- GP4 - payload.dd
-- GP5 - payload2.dd
-- GP10 - payload3.dd
-- GP11 - payload4.dd
+To select a payload from the 'payloads' directory, ground combination of these pins:
+- GP2 - value 1
+- GP3 - value 2
+- GP4 - value 4
+- GP5 - value 8
+
+default value is 0, grounding multiple pins at the same time sums their values. You can access maximum of 16 payloads this way payload0.dd - payload15.dd
 
 ## Changing Keyboard Layouts
 
 Copied from [Neradoc/Circuitpython_Keyboard_Layouts](https://github.com/Neradoc/Circuitpython_Keyboard_Layouts/blob/main/PICODUCKY.md)  
 
+This fork allows you to switch between layout by grounding one of these pins: GP18, GP19, GP20, GP21, or none for default layout.
 #### How to use one of these layouts with the pico-ducky repository.
 
 **Go to the [latest release page](https://github.com/Neradoc/Circuitpython_Keyboard_Layouts/releases/latest), look if your language is in the list.**
