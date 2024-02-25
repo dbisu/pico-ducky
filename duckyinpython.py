@@ -92,44 +92,43 @@ def sendString(line):
     layout.write(line)
 
 def parseLine(line):
-    global defaultDelay
-    keyword, value := line.split(maxsplit=1)
-
-    match keyword:
-        case "REM":
+global defaultDelay
+    if(line[0:3] == "REM"):
         # ignore ducky script comments
-            pass
-        case "DELAY":
-            time.sleep(float(value)/1000)
-        case "STRING":
-            sendString(value)
-        case "PRINT":
-            print("[SCRIPT]: " + value)
-        case "IMPORT":
-            runScript(value)
-        case "DEFAULT_DELAY" | "DEFAULTDELAY":
-            defaultDelay = int(value) * 10
-        case "LED":
-            if(led.value == True):
-                led.value = False
-            else:
-                led.value = True
-        case "WAIT_FOR_BUTTON_PRESS":
-            button_pressed = False
-            # NOTE: we don't use assincio in this case because we want to block code execution
-            while not button_pressed:
-                button1.update()
-    
-                button1Pushed = button1.fell
-                button1Released = button1.rose
-                button1Held = not button1.value
-    
-                if(button1Pushed):
-                    print("Button 1 pushed")
-                    button_pressed = True
-        case _:
-            newScriptLine = convertLine(line)
-            runScriptLine(newScriptLine)
+        pass
+    elif(line[0:5] == "DELAY"):
+        time.sleep(float(line[6:])/1000)
+    elif(line[0:6] == "STRING"):
+        sendString(line[7:])
+    elif(line[0:5] == "PRINT"):
+        print("[SCRIPT]: " + line[6:])
+    elif(line[0:6] == "IMPORT"):
+        runScript(line[7:])
+    elif(line[0:13] == "DEFAULT_DELAY"):
+        defaultDelay = int(line[14:]) * 10
+    elif(line[0:12] == "DEFAULTDELAY"):
+        defaultDelay = int(line[13:]) * 10
+    elif(line[0:3] == "LED"):
+        if(led.value == True):
+            led.value = False
+        else:
+            led.value = True
+    elif(line[0:21] == "WAIT_FOR_BUTTON_PRESS"):
+        button_pressed = False
+        # NOTE: we don't use assincio in this case because we want to block code execution
+        while not button_pressed:
+            button1.update()
+
+            button1Pushed = button1.fell
+            button1Released = button1.rose
+            button1Held = not button1.value
+
+            if(button1Pushed):
+                print("Button 1 pushed")
+                button_pressed = True
+    else:
+        newScriptLine = convertLine(line)
+        runScriptLine(newScriptLine)
 
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayout(kbd)
