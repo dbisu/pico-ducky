@@ -39,7 +39,7 @@ Copy the adafruit-circuitpython-raspberry_pi_pico_w-en_US-8.0.0.uf2 file to the 
 
 6. Follow the instructions in README.md to enter setup mode
 
-7. Copy your payload as payload.dd to the root of the CIRCUITPY
+7. Copy your payload as payload[0-15].dd to the payloads directory
 
 8. Unplug the device from the USB port and remove the setup jumper.
 
