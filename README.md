@@ -16,7 +16,7 @@
 
 <br />
 
-## What have I changed?
+## What have I changed? -- By PoulDev
 I added some commands to move the mouse pointer and clicking with it, I've also added some customer control commands like increasing the audio volume and more.
 
 ## Quick Start Guide
