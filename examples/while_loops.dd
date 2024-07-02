@@ -1,0 +1,7 @@
+VAR $TIME = 3
+WHILE ($TIME > 0)
+	STRING .
+	DELAY 500
+	STRING While Looop!!
+	ENTER
+END_WHILE
