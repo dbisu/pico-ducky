@@ -141,8 +141,21 @@ def parseLine(line, script_lines):
                 parseLine(loop_line, {})
             variables[var_name] -= 1
     elif line in functions:
+        updated_lines = []
+        inside_while_block = False
         for func_line in functions[line]:
-            parseLine(func_line, iter(functions[line]))
+            if func_line.startswith("WHILE"):
+                inside_while_block = True  # Start skipping lines
+                updated_lines.append(func_line)
+            elif func_line.startswith("END_WHILE"):
+                inside_while_block = False  # Stop skipping lines
+                updated_lines.append(func_line)
+                parseLine(updated_lines[0], iter(updated_lines))
+                updated_lines = []  # Clear updated_lines after parsing
+            elif inside_while_block:
+                updated_lines.append(func_line)
+            elif not (func_line.startswith("END_WHILE") or func_line.startswith("WHILE")):
+                parseLine(func_line, iter(functions[line]))
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
