@@ -186,13 +186,22 @@ def runScript(file):
     try:
         with open(duckyScriptPath, "r", encoding='utf-8') as f:
             script_lines = iter(f.readlines())
+            previousLine = ""
             for line in script_lines:
                 print(f"runScript: {line}")
-                parseLine(line, script_lines)
+                
+                if(line[0:6] == "REPEAT"):
+                    for i in range(int(line[7:])):
+                        #repeat the last command
+                        parseLine(previousLine, script_lines)
+                        time.sleep(float(defaultDelay) / 1000)
+                else:
+                    parseLine(line, script_lines)
+                    previousLine = line
                 time.sleep(float(defaultDelay) / 1000)
     except OSError as e:
         print("Unable to open file", file)
-
+        
 def selectPayload():
     global payload1Pin, payload2Pin, payload3Pin, payload4Pin
     payload = "payload.dd"
