@@ -2,7 +2,7 @@
 # copyright (c) 2023  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
 
-
+import re
 import time
 import digitalio
 from digitalio import DigitalInOut, Pull
@@ -47,6 +47,10 @@ duckyCommands = {
     'F12': Keycode.F12,
 
 }
+
+variables = {}
+functions = {}
+
 def convertLine(line):
     newline = []
     # print(line)
@@ -68,15 +72,17 @@ def convertLine(line):
     return newline
 
 def runScriptLine(line):
+    if isinstance(line, str):
+        line = convertLine(line)
     for k in line:
         kbd.press(k)
     kbd.release_all()
-
 def sendString(line):
     layout.write(line)
 
-def parseLine(line):
-    global defaultDelay
+def parseLine(line, script_lines):
+    global defaultDelay, variables, functions
+    line = line.strip()
     if(line[0:3] == "REM"):
         # ignore ducky script comments
         pass
@@ -110,6 +116,46 @@ def parseLine(line):
             if(button1Pushed):
                 print("Button 1 pushed")
                 button_pressed = True
+    elif line.startswith("VAR"):
+        _, var, _, value = line.split()
+        variables[var] = int(value)
+    elif line.startswith("FUNCTION"):
+        func_name = line.split()[1]
+        functions[func_name] = []
+        line = next(script_lines).strip()
+        while line != "END_FUNCTION":
+            functions[func_name].append(line)
+            line = next(script_lines).strip()
+    elif line.startswith("WHILE"):
+        condition = re.search(r'\((.*?)\)', line).group(1)
+        var_name, _, condition_value = condition.split()
+        condition_value = int(condition_value)
+        loop_code = []
+        line = next(script_lines).strip()
+        while line != "END_WHILE":
+            if not (line.startswith("WHILE")):
+                loop_code.append(line)
+            line = next(script_lines).strip()
+        while variables[var_name] > condition_value:
+            for loop_line in loop_code:
+                parseLine(loop_line, {})
+            variables[var_name] -= 1
+    elif line in functions:
+        updated_lines = []
+        inside_while_block = False
+        for func_line in functions[line]:
+            if func_line.startswith("WHILE"):
+                inside_while_block = True  # Start skipping lines
+                updated_lines.append(func_line)
+            elif func_line.startswith("END_WHILE"):
+                inside_while_block = False  # Stop skipping lines
+                updated_lines.append(func_line)
+                parseLine(updated_lines[0], iter(updated_lines))
+                updated_lines = []  # Clear updated_lines after parsing
+            elif inside_while_block:
+                updated_lines.append(func_line)
+            elif not (func_line.startswith("END_WHILE") or func_line.startswith("WHILE")):
+                parseLine(func_line, iter(functions[line]))
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
@@ -151,22 +197,24 @@ def runScript(file):
 
     duckyScriptPath = file
     try:
-        f = open(duckyScriptPath,"r",encoding='utf-8')
-        previousLine = ""
-        for line in f:
-            line = line.rstrip()
-            if(line[0:6] == "REPEAT"):
-                for i in range(int(line[7:])):
-                    #repeat the last command
-                    parseLine(previousLine)
-                    time.sleep(float(defaultDelay)/1000)
-            else:
-                parseLine(line)
-                previousLine = line
-            time.sleep(float(defaultDelay)/1000)
+        with open(duckyScriptPath, "r", encoding='utf-8') as f:
+            script_lines = iter(f.readlines())
+            previousLine = ""
+            for line in script_lines:
+                print(f"runScript: {line}")
+                
+                if(line[0:6] == "REPEAT"):
+                    for i in range(int(line[7:])):
+                        #repeat the last command
+                        parseLine(previousLine, script_lines)
+                        time.sleep(float(defaultDelay) / 1000)
+                else:
+                    parseLine(line, script_lines)
+                    previousLine = line
+                time.sleep(float(defaultDelay) / 1000)
     except OSError as e:
-        print("Unable to open file ", file)
-
+        print("Unable to open file", file)
+        
 def selectPayload():
     global payload1Pin, payload2Pin, payload3Pin, payload4Pin
     payload = "payload.dd"
