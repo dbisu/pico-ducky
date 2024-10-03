@@ -88,6 +88,10 @@ def parseLine(line, script_lines):
         pass
     elif(line[0:5] == "DELAY"):
         time.sleep(float(line[6:])/1000)
+    elif(line[0:8] == "STRINGLN"):
+        sendString(line[9:])
+        kbd.press(Keycode.ENTER)
+        kbd.release_all()
     elif(line[0:6] == "STRING"):
         sendString(line[7:])
     elif(line[0:5] == "PRINT"):
