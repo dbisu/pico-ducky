@@ -52,7 +52,7 @@ duckyCommands = {
 variables = {}
 functions = {}
 
-def convertLine(line):
+def convertLine(line): # change to add mouse support
     newline = []
     # print(line)
     # loop on each key - the filter removes empty values
@@ -78,6 +78,7 @@ def runScriptLine(line):
     for k in line:
         kbd.press(k)
     kbd.release_all()
+    
 def sendString(line):
     layout.write(line)
 
