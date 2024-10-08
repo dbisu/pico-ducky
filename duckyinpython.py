@@ -105,7 +105,7 @@ def parseLine(line, script_lines):
             led.value = True
     elif(line[0:21] == "WAIT_FOR_BUTTON_PRESS"):
         button_pressed = False
-        # NOTE: we don't use assincio in this case because we want to block code execution
+        # NOTE: we don't use asyncio in this case because we want to block code execution
         while not button_pressed:
             button1.update()
 
