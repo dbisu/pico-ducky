@@ -12,6 +12,7 @@ from board import *
 import pwmio
 import asyncio
 import usb_hid
+from absolute_mouse import Mouse
 from adafruit_hid.keyboard import Keyboard
 
 # comment out these lines for non_US keyboards
