@@ -12,7 +12,7 @@ import digitalio
 from board import *
 import board
 from duckyinpython import *
-if(board.board_id == 'raspberry_pi_pico_w'):
+if(board.board_id == 'raspberry_pi_pico_w' or board.board_id == 'raspberry_pi_pico2_w'):
     import wifi
     from webapp import *
 
@@ -41,9 +41,9 @@ def startWiFi():
 #supervisor.disable_autoreload()
 supervisor.runtime.autoreload = False
 
-if(board.board_id == 'raspberry_pi_pico'):
+if(board.board_id == 'raspberry_pi_pico' or board.board_id == 'raspberry_pi_pico2'):
     led = pwmio.PWMOut(board.LED, frequency=5000, duty_cycle=0)
-elif(board.board_id == 'raspberry_pi_pico_w'):
+elif(board.board_id == 'raspberry_pi_pico_w' or board.board_id == 'raspberry_pi_pico2_w'):
     led = digitalio.DigitalInOut(board.LED)
     led.switch_to_output()
 
@@ -68,7 +68,7 @@ async def main_loop():
     global led,button1
 
     button_task = asyncio.create_task(monitor_buttons(button1))
-    if(board.board_id == 'raspberry_pi_pico_w'):
+    if(board.board_id == 'raspberry_pi_pico_w' or board.board_id == 'raspberry_pi_pico2_w'):
         pico_led_task = asyncio.create_task(blink_pico_w_led(led))
         print("Starting Wifi")
         startWiFi()

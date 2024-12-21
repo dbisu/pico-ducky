@@ -202,7 +202,7 @@ def runScript(file):
             previousLine = ""
             for line in script_lines:
                 print(f"runScript: {line}")
-                
+
                 if(line[0:6] == "REPEAT"):
                     for i in range(int(line[7:])):
                         #repeat the last command
@@ -214,7 +214,7 @@ def runScript(file):
                 time.sleep(float(defaultDelay) / 1000)
     except OSError as e:
         print("Unable to open file", file)
-        
+
 def selectPayload():
     global payload1Pin, payload2Pin, payload3Pin, payload4Pin
     payload = "payload.dd"
@@ -249,9 +249,9 @@ def selectPayload():
 
 async def blink_led(led):
     print("Blink")
-    if(board.board_id == 'raspberry_pi_pico'):
+    if(board.board_id == 'raspberry_pi_pico' or board.board_id == 'raspberry_pi_pico2'):
         blink_pico_led(led)
-    elif(board.board_id == 'raspberry_pi_pico_w'):
+    elif(board.board_id == 'raspberry_pi_pico_w' or board.board_id == 'raspberry_pi_pico2_w'):
         blink_pico_w_led(led)
 
 async def blink_pico_led(led):

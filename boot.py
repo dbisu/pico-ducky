@@ -24,10 +24,10 @@ noStorageStatus = noStoragePin.value
 #   GP15 not connected == USB NOT visible
 #   GP15 connected to GND == USB visible
 
-if(board.board_id == 'raspberry_pi_pico'):
+if(board.board_id == 'raspberry_pi_pico' or board.board_id == 'raspberry_pi_pico2'):
     # On Pi Pico, default to USB visible
     noStorage = not noStorageStatus
-elif(board.board_id == 'raspberry_pi_pico_w'):
+elif(board.board_id == 'raspberry_pi_pico_w' or board.board_id == 'raspberry_pi_pico2_w'):
     # on Pi Pico W, default to USB hidden by default
     # so webapp can access storage
     noStorage = noStorageStatus
