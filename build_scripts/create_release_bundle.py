@@ -17,7 +17,8 @@ languages = [ "MAC_FR",
               "WIN_IT",
               "WIN_PO",
               "WIN_SW",
-              "WIN_TR" ]
+              "WIN_TR",
+              "WIN_UK" ]
 
 supported_boards = ["raspberry_pi_pico",
                     "raspberry_pi_pico_w",
