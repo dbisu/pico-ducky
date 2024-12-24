@@ -50,6 +50,7 @@ duckyCommands = {
 
 variables = {}
 functions = {}
+heldKeys = set()
 
 def convertLine(line):
     newline = []
@@ -86,6 +87,24 @@ def parseLine(line, script_lines):
     if(line[0:3] == "REM"):
         # ignore ducky script comments
         pass
+    elif line.startswith("HOLD"):
+        # HOLD command to press and hold a key
+        key = line[5:].strip().upper()
+        commandKeycode = duckyCommands.get(key, None)
+        if commandKeycode:
+            kbd.press(commandKeycode)
+            heldKeys.add(commandKeycode)
+        else:
+            print(f"Unknown key to HOLD: <{key}>")
+    elif line.startswith("RELEASE"):
+        # RELEASE command to release a held key
+        key = line[8:].strip().upper()
+        commandKeycode = duckyCommands.get(key, None)
+        if commandKeycode:
+            kbd.release(commandKeycode)
+            heldKeys.discard(commandKeycode)
+        else:
+            print(f"Unknown key to RELEASE: <{key}>")
     elif(line[0:5] == "DELAY"):
         time.sleep(float(line[6:])/1000)
     elif(line[0:6] == "STRING"):
