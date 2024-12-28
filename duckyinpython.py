@@ -76,7 +76,8 @@ def runScriptLine(line):
         line = convertLine(line)
     for k in line:
         kbd.press(k)
-    kbd.release_all()
+    for k in reversed(line):
+        kbd.release(k)
 def sendString(line):
     layout.write(line)
 
