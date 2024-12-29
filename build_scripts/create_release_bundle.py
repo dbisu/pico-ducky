@@ -22,7 +22,8 @@ languages = [ "MAC_FR",
 
 supported_boards = ["raspberry_pi_pico",
                     "raspberry_pi_pico_w",
-                    "raspberry_pi_pico2"]
+                    "raspberry_pi_pico2",
+                    "raspberry_pi_pico2_w"]
 
 files_to_bundle = ["boot.py",
                    "code.py",
