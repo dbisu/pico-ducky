@@ -231,6 +231,8 @@ def parseLine(line, script_lines):
     elif line == "SERIAL_RANDOM":
         for _ in range(12):
             sendString(random.choice(letters + letters.upper() + numbers + specialChars))
+    elif line == "RESET":
+        kbd.release_all()
     elif line in functions:
         updated_lines = []
         inside_while_block = False
@@ -287,22 +289,30 @@ def runScript(file):
     global defaultDelay
 
     duckyScriptPath = file
+    restart = True
     try:
-        with open(duckyScriptPath, "r", encoding='utf-8') as f:
-            script_lines = iter(f.readlines())
-            previousLine = ""
-            for line in script_lines:
-                print(f"runScript: {line}")
-
-                if(line[0:6] == "REPEAT"):
-                    for i in range(int(line[7:])):
-                        #repeat the last command
-                        parseLine(previousLine, script_lines)
-                        time.sleep(float(defaultDelay) / 1000)
-                else:
-                    parseLine(line, script_lines)
-                    previousLine = line
-                time.sleep(float(defaultDelay) / 1000)
+        while restart:
+            restart = False
+            with open(duckyScriptPath, "r", encoding='utf-8') as f:
+                script_lines = iter(f.readlines())
+                previousLine = ""
+                for line in script_lines:
+                    print(f"runScript: {line}")
+                    if(line[0:6] == "REPEAT"):
+                        for i in range(int(line[7:])):
+                            #repeat the last command
+                            parseLine(previousLine, script_lines)
+                            time.sleep(float(defaultDelay) / 1000)
+                    elif line == "RESTART_PAYLOAD":
+                        restart = True
+                        break
+                    elif line == "STOP_PAYLOAD":
+                        restart = False
+                        break
+                    else:
+                        parseLine(line, script_lines)
+                        previousLine = line
+                    time.sleep(float(defaultDelay) / 1000)
     except OSError as e:
         print("Unable to open file", file)
 
