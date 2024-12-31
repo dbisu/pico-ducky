@@ -87,6 +87,10 @@ def parseLine(line, script_lines):
     if(line[0:3] == "REM"):
         # ignore ducky script comments
         pass
+    elif line[0:9] == "REM_BLOCK":                              ##############################
+        line = next(script_lines).strip()
+        while line != "END_REM":
+            pass
     elif line.startswith("HOLD"):
         # HOLD command to press and hold a key
         key = line[5:].strip().upper()
@@ -105,8 +109,22 @@ def parseLine(line, script_lines):
             print(f"Unknown key to RELEASE: <{key}>")
     elif(line[0:5] == "DELAY"):
         time.sleep(float(line[6:])/1000)
+    elif line == "STRING":                 #< string block             ##############################
+        line = next(script_lines)
+        while line != "END_STRING":
+            sendString(line)
     elif(line[0:6] == "STRING"):
         sendString(line[7:])
+    elif line == "STRINGLN":               #< stringLN block               ##############################
+        line = next(script_lines)
+        while line != "END_STRINGLN":
+            sendString(line)
+            kbd.press(Keycode.ENTER)
+            kbd.release(Keycode.ENTER)
+    elif(line[0:8] == "STRINGLN"):                              ##############################
+        sendString(line[9:])
+        kbd.press(Keycode.ENTER)
+        kbd.release(Keycode.ENTER)
     elif(line[0:5] == "PRINT"):
         print("[SCRIPT]: " + line[6:])
     elif(line[0:6] == "IMPORT"):
