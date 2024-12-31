@@ -49,6 +49,7 @@ duckyCommands = {
 }
 
 variables = {}
+defines = {}
 functions = {}
 
 def convertLine(line):
@@ -84,6 +85,8 @@ def sendString(line):
 def parseLine(line, script_lines):
     global defaultDelay, variables, functions
     line = line.strip()
+    for define, value in defines.items():
+        line = line.replace(define, value)
     if line[:10] == "INJECT_MOD":
         line = line[11:]
     if(line[0:3] == "REM"):
@@ -167,6 +170,12 @@ def parseLine(line, script_lines):
     elif line.startswith("VAR"):
         _, var, _, value = line.split()
         variables[var] = int(value)
+    elif line.startswith("DEFINE"):
+        defineLocation = line.find(" ")
+        valueLocation = line.find(" ", defineLocation + 1)
+        defineName = line[defineLocation+1:valueLocation]
+        defineValue = line[valueLocation+1:]
+        defines[defineName] = defineValue
     elif line.startswith("FUNCTION"):
         func_name = line.split()[1]
         functions[func_name] = []
