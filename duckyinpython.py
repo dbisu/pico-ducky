@@ -84,6 +84,8 @@ def sendString(line):
 def parseLine(line, script_lines):
     global defaultDelay, variables, functions
     line = line.strip()
+    if line[:10] == "INJECT_MOD":
+        line = line[11:]
     if(line[0:3] == "REM"):
         # ignore ducky script comments
         pass
@@ -138,6 +140,17 @@ def parseLine(line, script_lines):
             led.value = False
         else:
             led.value = True
+    elif(line[0:3] == "LED"):
+        if(led.value == True):
+            led.value = False
+        else:
+            led.value = True
+    elif(line[:7] == "LED_OFF"):
+        led.value = False
+    elif(line[:5] == "LED_R"):
+        led.value = True
+    elif(line[:5] == "LED_G"):
+        led.value = True
     elif(line[0:21] == "WAIT_FOR_BUTTON_PRESS"):
         button_pressed = False
         # NOTE: we don't use assincio in this case because we want to block code execution
