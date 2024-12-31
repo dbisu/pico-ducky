@@ -8,6 +8,8 @@
 # ORDER OF OPERATIONS: ()
 # LOGICAL: && ||
 # IF THEN ELSE
+# Add jitter
+# Add LED functionality
 
 import re
 import time
@@ -95,20 +97,20 @@ def sendString(line):
     layout.write(line)
 
 def parseLine(line, script_lines):
-    global defaultDelay, variables, functions
+    global defaultDelay, variables, functions, defines
+    print(line)
     line = line.strip()
-    line.replace("$_RANDOM_INT", random.randint(int(variables["$_RANDOM_MIN"]), int(variables["$_RANDOM_MAX"])))
+    line = line.replace("$_RANDOM_INT", str(random.randint(int(variables.get("$_RANDOM_MIN", 0)), int(variables.get("$_RANDOM_MAX", 65535)))))
     for define, value in defines.items():
         line = line.replace(define, value)
     if line[:10] == "INJECT_MOD":
         line = line[11:]
-    if(line[0:3] == "REM"):
-        # ignore ducky script comments
+    elif line.startswith("REM_BLOCK"):
+        while line.startswith("END_REM") == False:
+            line = next(script_lines).strip()
+            print(line)
+    elif(line[0:3] == "REM"):
         pass
-    elif line[0:9] == "REM_BLOCK":                              ##############################
-        line = next(script_lines).strip()
-        while line != "END_REM":
-            pass
     elif line.startswith("HOLD"):
         # HOLD command to press and hold a key
         key = line[5:].strip().upper()
@@ -127,22 +129,24 @@ def parseLine(line, script_lines):
             print(f"Unknown key to RELEASE: <{key}>")
     elif(line[0:5] == "DELAY"):
         time.sleep(float(line[6:])/1000)
-    elif line == "STRING":                 #< string block             ##############################
-        line = next(script_lines)
-        while line != "END_STRING":
-            sendString(line)
-    elif(line[0:6] == "STRING"):
-        sendString(line[7:])
-    elif line == "STRINGLN":               #< stringLN block               ##############################
-        line = next(script_lines)
-        while line != "END_STRINGLN":
+    elif line == "STRINGLN":               #< stringLN block
+        line = next(script_lines).strip()
+        while line.startswith("END_STRINGLN") == False:
             sendString(line)
             kbd.press(Keycode.ENTER)
             kbd.release(Keycode.ENTER)
-    elif(line[0:8] == "STRINGLN"):                              ##############################
+            line = next(script_lines).strip()
+    elif(line[0:8] == "STRINGLN"):
         sendString(line[9:])
         kbd.press(Keycode.ENTER)
         kbd.release(Keycode.ENTER)
+    elif line == "STRING":                 #< string block
+        line = next(script_lines).strip()
+        while line.startswith("END_STRING") == False:
+            sendString(line)
+            line = next(script_lines).strip()
+    elif(line[0:6] == "STRING"):
+        sendString(line[7:])
     elif(line[0:5] == "PRINT"):
         print("[SCRIPT]: " + line[6:])
     elif(line[0:6] == "IMPORT"):
@@ -303,10 +307,10 @@ def runScript(file):
                             #repeat the last command
                             parseLine(previousLine, script_lines)
                             time.sleep(float(defaultDelay) / 1000)
-                    elif line == "RESTART_PAYLOAD":
+                    elif line.startswith("RESTART_PAYLOAD"):
                         restart = True
                         break
-                    elif line == "STOP_PAYLOAD":
+                    elif line.startswith("STOP_PAYLOAD"):
                         restart = False
                         break
                     else:
