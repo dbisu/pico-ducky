@@ -1,9 +1,17 @@
 # License : GPLv2.0
 # copyright (c) 2023  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
+#
+#  TODO: ADD support for the following:
+# MATH: = + - * / % ^
+# COMPARISON: == != < > <= >=
+# ORDER OF OPERATIONS: ()
+# LOGICAL: && ||
+# IF THEN ELSE
 
 import re
 import time
+import random
 import digitalio
 from digitalio import DigitalInOut, Pull
 from adafruit_debouncer import Debouncer
@@ -48,9 +56,13 @@ duckyCommands = {
 
 }
 
-variables = {}
+variables = {"$_RANDOM_MIN": 0, "$_RANDOM_MAX": 65535}
 defines = {}
 functions = {}
+
+letters = "abcdefghijklmnopqrstuvwxyz"
+numbers = "0123456789"
+specialChars = "!@#$%^&*()"
 
 def convertLine(line):
     newline = []
@@ -85,6 +97,7 @@ def sendString(line):
 def parseLine(line, script_lines):
     global defaultDelay, variables, functions
     line = line.strip()
+    line.replace("$_RANDOM_INT", random.randint(int(variables["$_RANDOM_MIN"]), int(variables["$_RANDOM_MAX"])))
     for define, value in defines.items():
         line = line.replace(define, value)
     if line[:10] == "INJECT_MOD":
@@ -197,6 +210,27 @@ def parseLine(line, script_lines):
             for loop_line in loop_code:
                 parseLine(loop_line, {})
             variables[var_name] -= 1
+    elif line == "RANDOM_LOWERCASE_LETTER":
+        sendString(random.choice(letters))
+    elif line == "RANDOM_UPPERCASE_LETTER":
+        sendString(random.choice(letters.upper()))
+    elif line == "RANDOM_LETTER":
+        sendString(random.choice(letters + letters.upper()))
+    elif line == "RANDOM_NUMBER":
+        sendString(random.choice(numbers))
+    elif line == "RANDOM_SPECIAL":
+        sendString(random.choice(specialChars))
+    elif line == "RANDOM_CHAR":
+        sendString(random.choice(letters + letters.upper() + numbers + specialChars))
+    elif line == "VID_RANDOM" or line == "PID_RANDOM":
+        for _ in range(4):
+            sendString(random.choice("0123456789ABCDEF"))
+    elif line == "MAN_RANDOM" or line == "PROD_RANDOM":
+        for _ in range(12):
+            sendString(random.choice(letters + letters.upper() + numbers))
+    elif line == "SERIAL_RANDOM":
+        for _ in range(12):
+            sendString(random.choice(letters + letters.upper() + numbers + specialChars))
     elif line in functions:
         updated_lines = []
         inside_while_block = False
