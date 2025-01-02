@@ -23,6 +23,8 @@ import pwmio
 import asyncio
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.consumer_control import ConsumerControl
+from adafruit_hid.consumer_control_code import ConsumerControlCode
 
 # comment out these lines for non_US keyboards
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
@@ -33,10 +35,10 @@ from adafruit_hid.keycode import Keycode
 #from keyboard_layout_win_LANG import KeyboardLayout
 #from keycode_win_LANG import Keycode
 
-duckyCommands = {
-    'WINDOWS': Keycode.WINDOWS, 'GUI': Keycode.GUI,
-    'APP': Keycode.APPLICATION, 'MENU': Keycode.APPLICATION, 'SHIFT': Keycode.SHIFT,
-    'ALT': Keycode.ALT, 'CONTROL': Keycode.CONTROL, 'CTRL': Keycode.CONTROL,
+duckyKeys = {
+    'WINDOWS': Keycode.GUI, 'RWINDOWS': Keycode.RIGHT_GUI, 'GUI': Keycode.GUI, 'RGUI': Keycode.RIGHT_GUI, 'COMMAND': Keycode.GUI, 'RCOMMAND': Keycode.RIGHT_GUI,
+    'APP': Keycode.APPLICATION, 'MENU': Keycode.APPLICATION, 'SHIFT': Keycode.SHIFT, 'RSHIFT': Keycode.RIGHT_SHIFT,
+    'ALT': Keycode.ALT, 'RALT': Keycode.RIGHT_ALT, 'OPTION': Keycode.ALT, 'ROPTION': Keycode.RIGHT_ALT, 'CONTROL': Keycode.CONTROL, 'CTRL': Keycode.CONTROL, 'RCTRL': Keycode.RIGHT_CONTROL,
     'DOWNARROW': Keycode.DOWN_ARROW, 'DOWN': Keycode.DOWN_ARROW, 'LEFTARROW': Keycode.LEFT_ARROW,
     'LEFT': Keycode.LEFT_ARROW, 'RIGHTARROW': Keycode.RIGHT_ARROW, 'RIGHT': Keycode.RIGHT_ARROW,
     'UPARROW': Keycode.UP_ARROW, 'UP': Keycode.UP_ARROW, 'BREAK': Keycode.PAUSE,
@@ -45,7 +47,7 @@ duckyCommands = {
     'INSERT': Keycode.INSERT, 'NUMLOCK': Keycode.KEYPAD_NUMLOCK, 'PAGEUP': Keycode.PAGE_UP,
     'PAGEDOWN': Keycode.PAGE_DOWN, 'PRINTSCREEN': Keycode.PRINT_SCREEN, 'ENTER': Keycode.ENTER,
     'SCROLLLOCK': Keycode.SCROLL_LOCK, 'SPACE': Keycode.SPACE, 'TAB': Keycode.TAB,
-    'BACKSPACE': Keycode.BACKSPACE,
+    'BACKSPACE': Keycode.BACKSPACE, 'POWER': Keycode.POWER,
     'A': Keycode.A, 'B': Keycode.B, 'C': Keycode.C, 'D': Keycode.D, 'E': Keycode.E,
     'F': Keycode.F, 'G': Keycode.G, 'H': Keycode.H, 'I': Keycode.I, 'J': Keycode.J,
     'K': Keycode.K, 'L': Keycode.L, 'M': Keycode.M, 'N': Keycode.N, 'O': Keycode.O,
@@ -54,8 +56,15 @@ duckyCommands = {
     'Z': Keycode.Z, 'F1': Keycode.F1, 'F2': Keycode.F2, 'F3': Keycode.F3,
     'F4': Keycode.F4, 'F5': Keycode.F5, 'F6': Keycode.F6, 'F7': Keycode.F7,
     'F8': Keycode.F8, 'F9': Keycode.F9, 'F10': Keycode.F10, 'F11': Keycode.F11,
-    'F12': Keycode.F12,
-
+    'F12': Keycode.F12, 'F13': Keycode.F13, 'F14': Keycode.F14, 'F15': Keycode.F15,
+    'F16': Keycode.F16, 'F17': Keycode.F17, 'F18': Keycode.F18, 'F19': Keycode.F19,
+    'F20': Keycode.F20, 'F21': Keycode.F21, 'F22': Keycode.F22, 'F23': Keycode.F23,
+    'F24': Keycode.F24
+}
+duckyConsumerKeys = {
+    'MK_VOLUP': ConsumerControlCode.VOLUME_INCREMENT, 'MK_VOLDOWN': ConsumerControlCode.VOLUME_DECREMENT, 'MK_MUTE': ConsumerControlCode.MUTE,
+    'MK_NEXT': ConsumerControlCode.SCAN_NEXT_TRACK, 'MK_PREV': ConsumerControlCode.SCAN_PREVIOUS_TRACK,
+    'MK_PP': ConsumerControlCode.PLAY_PAUSE, 'MK_STOP': ConsumerControlCode.STOP
 }
 
 variables = {"$_RANDOM_MIN": 0, "$_RANDOM_MAX": 65535}
@@ -67,32 +76,42 @@ numbers = "0123456789"
 specialChars = "!@#$%^&*()"
 
 def convertLine(line):
-    newline = []
+    commands = []
     # print(line)
     # loop on each key - the filter removes empty values
     for key in filter(None, line.split(" ")):
         key = key.upper()
         # find the keycode for the command in the list
-        command_keycode = duckyCommands.get(key, None)
+        command_keycode = duckyKeys.get(key, None)
+        command_consumer_keycode = duckyConsumerKeys.get(key, None)
         if command_keycode is not None:
             # if it exists in the list, use it
-            newline.append(command_keycode)
+            commands.append(command_keycode)
+        elif command_consumer_keycode is not None:
+            # if it exists in the list, use it
+            commands.append(1000+command_consumer_keycode)
         elif hasattr(Keycode, key):
             # if it's in the Keycode module, use it (allows any valid keycode)
-            newline.append(getattr(Keycode, key))
+            commands.append(getattr(Keycode, key))
         else:
             # if it's not a known key name, show the error for diagnosis
             print(f"Unknown key: <{key}>")
-    # print(newline)
-    return newline
+    # print(commands)
+    return commands
 
 def runScriptLine(line):
-    if isinstance(line, str):
-        line = convertLine(line)
-    for k in line:
-        kbd.press(k)
-    for k in reversed(line):
-        kbd.release(k)
+    keys = convertLine(line)
+    for k in keys:
+        if k > 1000:
+            consumerControl.press(int(k-1000))
+        else:
+            kbd.press(k)
+    for k in reversed(keys):
+        if k > 1000:
+            consumerControl.release()
+        else:
+            kbd.release(k)
+
 def sendString(line):
     layout.write(line)
 
@@ -114,7 +133,7 @@ def parseLine(line, script_lines):
     elif line.startswith("HOLD"):
         # HOLD command to press and hold a key
         key = line[5:].strip().upper()
-        commandKeycode = duckyCommands.get(key, None)
+        commandKeycode = duckyKeys.get(key, None)
         if commandKeycode:
             kbd.press(commandKeycode)
         else:
@@ -122,7 +141,7 @@ def parseLine(line, script_lines):
     elif line.startswith("RELEASE"):
         # RELEASE command to release a held key
         key = line[8:].strip().upper()
-        commandKeycode = duckyCommands.get(key, None)
+        commandKeycode = duckyKeys.get(key, None)
         if commandKeycode:
             kbd.release(commandKeycode)
         else:
@@ -254,10 +273,10 @@ def parseLine(line, script_lines):
             elif not (func_line.startswith("END_WHILE") or func_line.startswith("WHILE")):
                 parseLine(func_line, iter(functions[line]))
     else:
-        newScriptLine = convertLine(line)
-        runScriptLine(newScriptLine)
+        runScriptLine(line)
 
 kbd = Keyboard(usb_hid.devices)
+consumerControl = ConsumerControl(usb_hid.devices)
 layout = KeyboardLayout(kbd)
 
 
