@@ -11,7 +11,8 @@ import storage
 noStorage = False
 noStoragePin = digitalio.DigitalInOut(GP15)
 noStoragePin.switch_to_input(pull=digitalio.Pull.UP)
-noStorageStatus = noStoragePin.value
+setupPin = digitalio.DigitalInOut(GP0)
+setupPin.switch_to_input(pull=digitalio.Pull.UP)
 
 # If GP15 is not connected, it will default to being pulled high (True)
 # If GP is connected to GND, it will be low (False)
@@ -26,11 +27,12 @@ noStorageStatus = noStoragePin.value
 
 if(board.board_id == 'raspberry_pi_pico' or board.board_id == 'raspberry_pi_pico2'):
     # On Pi Pico, default to USB visible
-    noStorage = not noStorageStatus
+    noStorage = not noStoragePin.value
 elif(board.board_id == 'raspberry_pi_pico_w' or board.board_id == 'raspberry_pi_pico2_w'):
     # on Pi Pico W, default to USB hidden by default
     # so webapp can access storage
-    noStorage = noStorageStatus
+    # enable storage if setup mode
+    noStorage = noStoragePin.value and setupPin.value
 
 if(noStorage == True):
     # don't show USB drive to host PC
