@@ -314,7 +314,7 @@ def parseLine(line, script_lines):
 
 kbd = Keyboard(usb_hid.devices)
 consumerControl = ConsumerControl(usb_hid.devices)
-layout = KeyboardLayout(kbd)\
+layout = KeyboardLayout(kbd)
 
 #init button
 button1_pin = DigitalInOut(GP22) # defaults to input
