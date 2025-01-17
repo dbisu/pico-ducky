@@ -243,8 +243,8 @@ keycode_win_de.mpy
 
 ### Installation Tool
 
-[raspberrydeveloper](https://github.com/raspberrydeveloper) Created a tool to convert a blank RPi Pico to a ducky.  
-You can find the tool [here](https://github.com/raspberrydeveloper/pyducky)
+[ryo-yamada](https://github.com/ryo-yamada) Created a tool to convert a blank RPi Pico to a ducky.  
+You can find the tool [here](https://github.com/ryo-yamada/PicoDuckyBuilder)
 
 ### Docs
 
