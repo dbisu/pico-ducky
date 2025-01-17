@@ -3,9 +3,6 @@
 # Author: Dave Bailey (dbisu, @daveisu)
 #
 #  TODO: ADD support for the following:
-# COMPARISON: == != < > <= >=
-# ORDER OF OPERATIONS: ()
-# LOGICAL: && ||
 # IF THEN ELSE
 # Add jitter
 # Add LED functionality
@@ -78,9 +75,11 @@ def evaluateExpression(expression):
     """Evaluates an expression with variables and returns the result."""
     # Replace variables (e.g., $FOO) in the expression with their values
     expression = re.sub(r"\$(\w+)", lambda m: str(variables.get(f"${m.group(1)}", 0)), expression)
-    # Replace ^ with ** for exponentiation
-    expression = expression.replace("^", "**")
-    # Evaluate the expression
+
+    expression = expression.replace("^", "**")     #< Replace ^ with ** for exponentiation
+    expression = expression.replace("&&", "and")
+    expression = expression.replace("||", "or")
+
     return eval(expression, {}, variables)
 
 def convertLine(line):
@@ -315,10 +314,7 @@ def parseLine(line, script_lines):
 
 kbd = Keyboard(usb_hid.devices)
 consumerControl = ConsumerControl(usb_hid.devices)
-layout = KeyboardLayout(kbd)
-
-
-
+layout = KeyboardLayout(kbd)\
 
 #init button
 button1_pin = DigitalInOut(GP22) # defaults to input
