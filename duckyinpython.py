@@ -70,60 +70,74 @@ letters = "abcdefghijklmnopqrstuvwxyz"
 numbers = "0123456789"
 specialChars = "!@#$%^&*()"
 
+
 class IF:
     def __init__(self, condition, codeIter):
         self.condition = condition
-        self.codeIter = codeIter
-        self.lastIfResult = None 
+        self.codeIter = list(codeIter)
+        self.lastIfResult = None
+    
+    def _exitIf(self):
+        _depth = 0
+        for line in self.codeIter:
+            line = self.codeIter.pop(0)
+            line = line.strip()
+            if line.upper().startswith("END_IF"):
+                _depth -= 1
+            elif line.upper().startswith("IF"):
+                _depth += 1
+            if _depth < 0:
+                print("No else, exiting" + str(list(self.codeIter)))
+                break
+        return(self.codeIter)
 
     def runIf(self):
-        try:
-            if isinstance(self.condition, str):
-                self.lastIfResult = evaluateExpression(self.condition)
-            elif isinstance(self.condition, bool):
-                self.lastIfResult = self.condition
-            else:
-                raise ValueError("Invalid condition type")
+        if isinstance(self.condition, str):
+            self.lastIfResult = evaluateExpression(self.condition)
+        elif isinstance(self.condition, bool):
+            self.lastIfResult = self.condition
+        else:
+            raise ValueError("Invalid condition type")
 
-            depth = 0
-            for line in self.codeIter:
-                line = line.strip()
+        # print(f"condition {self.condition} result is {self.lastIfResult} since \"$VAR\" is {variables["$VAR"]}, code is {self.codeIter}")
+        depth = 0
+        for line in self.codeIter:
+            line = self.codeIter.pop(0)
+            line = line.strip()
+            if line == "":
+                continue
+            # print(line)
 
-                if line.startswith("IF"):
-                    depth += 1
-                elif line.startswith("END_IF"):
-                    depth -=1
+            if line.startswith("IF"):
+                depth += 1
+            elif line.startswith("END_IF"):
+                if depth == 0:
+                    return(self.codeIter, -1)
+                depth -=1
 
-                elif line.startswith("ELSE") and depth == 0:
-                    if self.lastIfResult is False:
-                        line = line[4:].strip()  # Remove 'ELSE' and strip whitespace
-                        if line.startswith("IF"):
-                            nestedCondition = _getIfCondition(line)
-                            self.codeIter, self.lastIfResult = IF(nestedCondition, self.codeIter).runIf()
-                        else:
-                            return IF(True, self.codeIter).runIf()                        #< Regular ELSE block
+            elif line.startswith("ELSE") and depth == 0:
+                # print(f"ELSE LINE {line}, lastIfResult: {self.lastIfResult}")
+                if self.lastIfResult is False:
+                    line = line[4:].strip()  # Remove 'ELSE' and strip whitespace
+                    if line.startswith("IF"):
+                        nestedCondition = _getIfCondition(line)
+                        # print(f"nested IF {nestedCondition}")
+                        self.codeIter, self.lastIfResult = IF(nestedCondition, self.codeIter).runIf()
+                        if self.lastIfResult == -1 or self.lastIfResult == True:
+                            # print(f"self.lastIfResult {self.lastIfResult}")
+                            return(self.codeIter, True)
                     else:
-                        _depth = 1
-                        for line in self.codeIter:
-                            line = line.strip()
-                            if line.upper().startswith("END_IF"):
-                                _depth -= 1
-                            elif line.upper().startswith("IF"):
-                                _depth += 1
-                            if _depth <= 0:
-                                break
+                        return IF(True, self.codeIter).runIf()                        #< Regular ELSE block
+                else:
+                    self._exitIf()
+                    break
 
-                        break
-
-                # Process regular lines
-                elif self.lastIfResult:
-                    parseLine(line, self.codeIter)
-
-            return self.codeIter, self.lastIfResult
-
-        except StopIteration:
-            # Handle cases where the code iterator is exhausted
-            return self.codeIter, self.lastIfResult
+            # Process regular lines
+            elif self.lastIfResult:
+                # print(f"running line {line}")
+                self.codeIter = list(parseLine(line, self.codeIter))
+        # print("end of if")
+        return(self.codeIter, self.lastIfResult)
 
 def _getIfCondition(line):
     return str(line)[2:-4].strip()
@@ -159,6 +173,9 @@ def evaluateExpression(expression):
     expression = expression.replace("||", "or")
 
     return eval(expression, {}, variables)
+
+def deepcopy(List):
+    return(List[:])
 
 def convertLine(line):
     commands = []
@@ -339,15 +356,18 @@ def parseLine(line, script_lines):
     elif line.startswith("WHILE"):
         # print("ENTER WHILE LOOP")
         condition = line[5:].strip()
-        loopCode = _getCodeBlock(script_lines)
+        loopCode = list(_getCodeBlock(script_lines))
         while evaluateExpression(condition) == True:
-            currentIterCode = iter(loopCode)
-            for loop_line in currentIterCode:
-                currentIterCode = parseLine(loop_line, currentIterCode)
-                # print(list(currentIterCode))
+            currentIterCode = deepcopy(loopCode)
+            print(loopCode)
+            while currentIterCode:
+                loopLine = currentIterCode.pop(0)
+                currentIterCode = list(parseLine(loopLine, iter(currentIterCode)))      #< very inefficient, should be replaced later.
+
     elif line.upper().startswith("IF"):
         # print("ENTER IF")
-        script_lines, _ = IF(_getIfCondition(line), script_lines).runIf()
+        script_lines, ret = IF(_getIfCondition(line), script_lines).runIf()
+        print(f"IF returned {ret} code")
     elif line.upper().startswith("END_IF"):
         pass
     elif line == "RANDOM_LOWERCASE_LETTER":
