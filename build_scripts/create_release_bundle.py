@@ -114,7 +114,7 @@ def main(argv):
         replacements = {
             "#from keyboard_layout_win_LANG": "from keyboard_layout_"+dest_dir.lower(),
             "#from keycode_win_LANG": "from keycode_"+dest_dir.lower(),
-            "from adafruit_hid.keyboard": "#from adafruit_hid.keyboard",
+            "from adafruit_hid.keyboard_": "#from adafruit_hid.keyboard_",
             "from adafruit_hid.keycode": "#from adafruit_hid.keycode"
         }
 
