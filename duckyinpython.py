@@ -3,10 +3,6 @@
 # Author: Dave Bailey (dbisu, @daveisu)
 #
 #  TODO: ADD support for the following:
-# MATH: = + - * / % ^
-# COMPARISON: == != < > <= >=
-# ORDER OF OPERATIONS: ()
-# LOGICAL: && ||
 # IF THEN ELSE
 # Add jitter
 # Add LED functionality
@@ -75,6 +71,17 @@ letters = "abcdefghijklmnopqrstuvwxyz"
 numbers = "0123456789"
 specialChars = "!@#$%^&*()"
 
+def evaluateExpression(expression):
+    """Evaluates an expression with variables and returns the result."""
+    # Replace variables (e.g., $FOO) in the expression with their values
+    expression = re.sub(r"\$(\w+)", lambda m: str(variables.get(f"${m.group(1)}", 0)), expression)
+
+    expression = expression.replace("^", "**")     #< Replace ^ with ** for exponentiation
+    expression = expression.replace("&&", "and")
+    expression = expression.replace("||", "or")
+
+    return eval(expression, {}, variables)
+
 def convertLine(line):
     commands = []
     # print(line)
@@ -115,13 +122,22 @@ def runScriptLine(line):
 def sendString(line):
     layout.write(line)
 
+def replaceVariables(line):
+    for var in variables:
+        line = line.replace(var, str(variables[var]))
+    return line
+
+def replaceDefines(line):
+    for define, value in defines.items():
+        line = line.replace(define, value)
+    return line
+
 def parseLine(line, script_lines):
     global defaultDelay, variables, functions, defines
     print(line)
     line = line.strip()
     line = line.replace("$_RANDOM_INT", str(random.randint(int(variables.get("$_RANDOM_MIN", 0)), int(variables.get("$_RANDOM_MAX", 65535)))))
-    for define, value in defines.items():
-        line = line.replace(define, value)
+    line = replaceDefines(line)
     if line[:10] == "INJECT_MOD":
         line = line[11:]
     elif line.startswith("REM_BLOCK"):
@@ -147,25 +163,32 @@ def parseLine(line, script_lines):
         else:
             print(f"Unknown key to RELEASE: <{key}>")
     elif(line[0:5] == "DELAY"):
+        line = replaceVariables(line)
         time.sleep(float(line[6:])/1000)
     elif line == "STRINGLN":               #< stringLN block
         line = next(script_lines).strip()
+        line = replaceVariables(line)
         while line.startswith("END_STRINGLN") == False:
             sendString(line)
             kbd.press(Keycode.ENTER)
             kbd.release(Keycode.ENTER)
             line = next(script_lines).strip()
+            line = replaceVariables(line)
+            line = replaceDefines(line)
     elif(line[0:8] == "STRINGLN"):
-        sendString(line[9:])
+        sendString(replaceVariables(line[9:]))
         kbd.press(Keycode.ENTER)
         kbd.release(Keycode.ENTER)
     elif line == "STRING":                 #< string block
         line = next(script_lines).strip()
+        line = replaceVariables(line)
         while line.startswith("END_STRING") == False:
             sendString(line)
             line = next(script_lines).strip()
+            line = replaceVariables(line)
+            line = replaceDefines(line)
     elif(line[0:6] == "STRING"):
-        sendString(line[7:])
+        sendString(replaceVariables(line[7:]))
     elif(line[0:5] == "PRINT"):
         print("[SCRIPT]: " + line[6:])
     elif(line[0:6] == "IMPORT"):
@@ -204,8 +227,22 @@ def parseLine(line, script_lines):
                 print("Button 1 pushed")
                 button_pressed = True
     elif line.startswith("VAR"):
-        _, var, _, value = line.split()
-        variables[var] = int(value)
+        match = re.match(r"VAR\s+\$(\w+)\s*=\s*(.+)", line)
+        if match:
+            varName = f"${match.group(1)}"
+            value = evaluateExpression(match.group(2))
+            variables[varName] = value
+        else:
+            raise SyntaxError(f"Invalid variable declaration: {line}")
+    elif line.startswith("$"):
+        match = re.match(r"\$(\w+)\s*=\s*(.+)", line)
+        if match:
+            varName = f"${match.group(1)}"
+            expression = match.group(2)
+            value = evaluateExpression(expression)
+            variables[varName] = value
+        else:
+            raise SyntaxError(f"Invalid variable update, declare variable first: {line}")
     elif line.startswith("DEFINE"):
         defineLocation = line.find(" ")
         valueLocation = line.find(" ", defineLocation + 1)
@@ -278,9 +315,6 @@ def parseLine(line, script_lines):
 kbd = Keyboard(usb_hid.devices)
 consumerControl = ConsumerControl(usb_hid.devices)
 layout = KeyboardLayout(kbd)
-
-
-
 
 #init button
 button1_pin = DigitalInOut(GP22) # defaults to input
