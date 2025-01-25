@@ -31,6 +31,15 @@ from adafruit_hid.keycode import Keycode
 #from keyboard_layout_win_LANG import KeyboardLayout as KeyboardLayout
 #from keycode_win_LANG import Keycode
 
+def _capsOn():
+    return kbd.led_on(Keyboard.LED_CAPS_LOCK)
+
+def _numOn():
+    return kbd.led_on(Keyboard.LED_NUM_LOCK)
+
+def _scrollOn():
+    return kbd.led_on(Keyboard.LED_SCROLL_LOCK)
+
 duckyKeys = {
     'WINDOWS': Keycode.GUI, 'RWINDOWS': Keycode.RIGHT_GUI, 'GUI': Keycode.GUI, 'RGUI': Keycode.RIGHT_GUI, 'COMMAND': Keycode.GUI, 'RCOMMAND': Keycode.RIGHT_GUI,
     'APP': Keycode.APPLICATION, 'MENU': Keycode.APPLICATION, 'SHIFT': Keycode.SHIFT, 'RSHIFT': Keycode.RIGHT_SHIFT,
@@ -64,12 +73,15 @@ duckyConsumerKeys = {
 }
 
 variables = {"$_RANDOM_MIN": 0, "$_RANDOM_MAX": 65535}
+internalVariables = {"$_CAPSLOCK_ON": _capsOn, "$_NUMLOCK_ON": _numOn, "$_SCROLLLOCK_ON": _scrollOn}
 defines = {}
 functions = {}
 
 letters = "abcdefghijklmnopqrstuvwxyz"
 numbers = "0123456789"
 specialChars = "!@#$%^&*()"
+
+
 
 def evaluateExpression(expression):
     """Evaluates an expression with variables and returns the result."""
@@ -125,6 +137,8 @@ def sendString(line):
 def replaceVariables(line):
     for var in variables:
         line = line.replace(var, str(variables[var]))
+    for var in internalVariables:
+        line = line.replace(var, str(internalVariables[var]()))
     return line
 
 def replaceDefines(line):
