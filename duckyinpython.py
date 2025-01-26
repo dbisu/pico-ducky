@@ -81,8 +81,6 @@ letters = "abcdefghijklmnopqrstuvwxyz"
 numbers = "0123456789"
 specialChars = "!@#$%^&*()"
 
-
-
 def evaluateExpression(expression):
     """Evaluates an expression with variables and returns the result."""
     # Replace variables (e.g., $FOO) in the expression with their values
