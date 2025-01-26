@@ -3,7 +3,6 @@
 # Author: Dave Bailey (dbisu, @daveisu)
 #
 #  TODO: ADD support for the following:
-# IF THEN ELSE
 # Add jitter
 # Add LED functionality
 
@@ -71,6 +70,98 @@ letters = "abcdefghijklmnopqrstuvwxyz"
 numbers = "0123456789"
 specialChars = "!@#$%^&*()"
 
+class IF:
+    def __init__(self, condition, codeIter):
+        self.condition = condition
+        self.codeIter = list(codeIter)
+        self.lastIfResult = None
+    
+    def _exitIf(self):
+        _depth = 0
+        for line in self.codeIter:
+            line = self.codeIter.pop(0)
+            line = line.strip()
+            if line.upper().startswith("END_IF"):
+                _depth -= 1
+            elif line.upper().startswith("IF"):
+                _depth += 1
+            if _depth < 0:
+                print("No else, exiting" + str(list(self.codeIter)))
+                break
+        return(self.codeIter)
+
+    def runIf(self):
+        if isinstance(self.condition, str):
+            self.lastIfResult = evaluateExpression(self.condition)
+        elif isinstance(self.condition, bool):
+            self.lastIfResult = self.condition
+        else:
+            raise ValueError("Invalid condition type")
+
+        # print(f"condition {self.condition} result is {self.lastIfResult} since \"$VAR\" is {variables["$VAR"]}, code is {self.codeIter}")
+        depth = 0
+        for line in self.codeIter:
+            line = self.codeIter.pop(0)
+            line = line.strip()
+            if line == "":
+                continue
+            # print(line)
+
+            if line.startswith("IF"):
+                depth += 1
+            elif line.startswith("END_IF"):
+                if depth == 0:
+                    return(self.codeIter, -1)
+                depth -=1
+
+            elif line.startswith("ELSE") and depth == 0:
+                # print(f"ELSE LINE {line}, lastIfResult: {self.lastIfResult}")
+                if self.lastIfResult is False:
+                    line = line[4:].strip()  # Remove 'ELSE' and strip whitespace
+                    if line.startswith("IF"):
+                        nestedCondition = _getIfCondition(line)
+                        # print(f"nested IF {nestedCondition}")
+                        self.codeIter, self.lastIfResult = IF(nestedCondition, self.codeIter).runIf()
+                        if self.lastIfResult == -1 or self.lastIfResult == True:
+                            # print(f"self.lastIfResult {self.lastIfResult}")
+                            return(self.codeIter, True)
+                    else:
+                        return IF(True, self.codeIter).runIf()                        #< Regular ELSE block
+                else:
+                    self._exitIf()
+                    break
+
+            # Process regular lines
+            elif self.lastIfResult:
+                # print(f"running line {line}")
+                self.codeIter = list(parseLine(line, self.codeIter))
+        # print("end of if")
+        return(self.codeIter, self.lastIfResult)
+
+def _getIfCondition(line):
+    return str(line)[2:-4].strip()
+
+def _isCodeBlock(line):
+    line = line.upper().strip()
+    if line.startswith("IF") or line.startswith("WHILE"):
+        return True
+    return False
+
+def _getCodeBlock(linesIter):
+    """Returns the code block starting at the given line."""
+    code = []
+    depth = 1
+    for line in linesIter:
+        line = line.strip()
+        if line.upper().startswith("END_"):
+            depth -= 1
+        elif _isCodeBlock(line):
+            depth += 1
+        if depth <= 0:
+            break
+        code.append(line)
+    return code
+
 def evaluateExpression(expression):
     """Evaluates an expression with variables and returns the result."""
     # Replace variables (e.g., $FOO) in the expression with their values
@@ -81,6 +172,9 @@ def evaluateExpression(expression):
     expression = expression.replace("||", "or")
 
     return eval(expression, {}, variables)
+
+def deepcopy(List):
+    return(List[:])
 
 def convertLine(line):
     commands = []
@@ -134,7 +228,6 @@ def replaceDefines(line):
 
 def parseLine(line, script_lines):
     global defaultDelay, variables, functions, defines
-    print(line)
     line = line.strip()
     line = line.replace("$_RANDOM_INT", str(random.randint(int(variables.get("$_RANDOM_MIN", 0)), int(variables.get("$_RANDOM_MAX", 65535)))))
     line = replaceDefines(line)
@@ -143,7 +236,7 @@ def parseLine(line, script_lines):
     elif line.startswith("REM_BLOCK"):
         while line.startswith("END_REM") == False:
             line = next(script_lines).strip()
-            print(line)
+            # print(line)
     elif(line[0:3] == "REM"):
         pass
     elif line.startswith("HOLD"):
@@ -190,7 +283,8 @@ def parseLine(line, script_lines):
     elif(line[0:6] == "STRING"):
         sendString(replaceVariables(line[7:]))
     elif(line[0:5] == "PRINT"):
-        print("[SCRIPT]: " + line[6:])
+        line = replaceVariables(line[6:])
+        print("[SCRIPT]: " + line)
     elif(line[0:6] == "IMPORT"):
         runScript(line[7:])
     elif(line[0:13] == "DEFAULT_DELAY"):
@@ -250,6 +344,7 @@ def parseLine(line, script_lines):
         defineValue = line[valueLocation+1:]
         defines[defineName] = defineValue
     elif line.startswith("FUNCTION"):
+        # print("ENTER FUNCTION")
         func_name = line.split()[1]
         functions[func_name] = []
         line = next(script_lines).strip()
@@ -257,19 +352,22 @@ def parseLine(line, script_lines):
             functions[func_name].append(line)
             line = next(script_lines).strip()
     elif line.startswith("WHILE"):
-        condition = re.search(r'\((.*?)\)', line).group(1)
-        var_name, _, condition_value = condition.split()
-        condition_value = int(condition_value)
-        loop_code = []
-        line = next(script_lines).strip()
-        while line != "END_WHILE":
-            if not (line.startswith("WHILE")):
-                loop_code.append(line)
-            line = next(script_lines).strip()
-        while variables[var_name] > condition_value:
-            for loop_line in loop_code:
-                parseLine(loop_line, {})
-            variables[var_name] -= 1
+        # print("ENTER WHILE LOOP")
+        condition = line[5:].strip()
+        loopCode = list(_getCodeBlock(script_lines))
+        while evaluateExpression(condition) == True:
+            currentIterCode = deepcopy(loopCode)
+            print(loopCode)
+            while currentIterCode:
+                loopLine = currentIterCode.pop(0)
+                currentIterCode = list(parseLine(loopLine, iter(currentIterCode)))      #< very inefficient, should be replaced later.
+
+    elif line.upper().startswith("IF"):
+        # print("ENTER IF")
+        script_lines, ret = IF(_getIfCondition(line), script_lines).runIf()
+        print(f"IF returned {ret} code")
+    elif line.upper().startswith("END_IF"):
+        pass
     elif line == "RANDOM_LOWERCASE_LETTER":
         sendString(random.choice(letters))
     elif line == "RANDOM_UPPERCASE_LETTER":
@@ -311,6 +409,8 @@ def parseLine(line, script_lines):
                 parseLine(func_line, iter(functions[line]))
     else:
         runScriptLine(line)
+    
+    return(script_lines)
 
 kbd = Keyboard(usb_hid.devices)
 consumerControl = ConsumerControl(usb_hid.devices)
