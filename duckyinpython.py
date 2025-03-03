@@ -172,10 +172,23 @@ def _getCodeBlock(linesIter):
         code.append(line)
     return code
 
+def replaceBooleans(text):                             #< fix capitalization mistakes in true and false (for evaluating with booleans)
+    lower = text.lower()
+    if "true" not in lower and "false" not in lower:
+        return text
+    words = text.split()
+    for i, word in enumerate(words):
+        if word.lower() == "true":
+            words[i] = "True"
+        elif word.lower() == "false":
+            words[i] = "False"
+    return " ".join(words)
+
 def evaluateExpression(expression):
     """Evaluates an expression with variables and returns the result."""
     # Replace variables (e.g., $FOO) in the expression with their values
-    expression = re.sub(r'\b(true|false)\b', lambda m: m.group(0).capitalize(), expression, flags=re.IGNORECASE)  #< fix capitalization mistakes in true and false (for evaluating with booleans)
+    print(expression)
+    expression = replaceBooleans(expression)       #< Cant use re due its limitation in circutpython
     expression = re.sub(r"\$(\w+)", lambda m: str(variables.get(f"${m.group(1)}", 0)), expression)
 
     expression = expression.replace("^", "**")     #< Replace ^ with ** for exponentiation
