@@ -173,23 +173,17 @@ def _getCodeBlock(linesIter):
     return code
 
 def replaceBooleans(text):                             #< fix capitalization mistakes in true and false (for evaluating with booleans)
-    lower = text.lower()
-    if "true" not in lower and "false" not in lower:
-        return text
-    words = text.split()
-    for i, word in enumerate(words):
-        if word.lower() == "true":
-            words[i] = "True"
-        elif word.lower() == "false":
-            words[i] = "False"
-    return " ".join(words)
+    # Replace any letter-by-letter match for "true" with the proper "True"
+    text = re.sub(r'[Tt][Rr][Uu][Ee]', 'True', text)
+    # Replace any letter-by-letter match for "false" with the proper "False"
+    text = re.sub(r'[Ff][Aa][Ll][Ss][Ee]', 'False', text)
+    return text
 
 def evaluateExpression(expression):
     """Evaluates an expression with variables and returns the result."""
-    # Replace variables (e.g., $FOO) in the expression with their values
-    print(expression)
+    expression = replaceVariables(expression)
     expression = replaceBooleans(expression)       #< Cant use re due its limitation in circutpython
-    expression = re.sub(r"\$(\w+)", lambda m: str(variables.get(f"${m.group(1)}", 0)), expression)
+    print(expression)
 
     expression = expression.replace("^", "**")     #< Replace ^ with ** for exponentiation
     expression = expression.replace("&&", "and")
@@ -355,12 +349,30 @@ def parseLine(line, script_lines):
         else:
             raise SyntaxError(f"Invalid variable declaration: {line}")
     elif line.startswith("$"):
-        match = re.match(r"\$(\w+)\s*=\s*(.+)", line)
+        match = re.match(r"\$(\w+)\s*([\+\-\*/]?)=\s*(.+)", line)
         if match:
-            varName = f"${match.group(1)}"
-            expression = match.group(2)
-            value = evaluateExpression(expression)
-            variables[varName] = value
+            varName = f"${match.group(1)}"  # Extract variable name
+            operator = match.group(2)  # Extract the operator (if any)
+            expression = match.group(3)  # Extract the right-hand side
+
+            # Ensure the variable exists before updating
+            if operator and varName not in variables:
+                raise SyntaxError(f"Invalid variable update, declare variable first: {line}")
+
+            value = evaluateExpression(expression)  # Evaluate the expression
+
+            if operator:  # Handling updates like +=, -=, etc.
+                if operator == "+":
+                    variables[varName] += value
+                elif operator == "-":
+                    variables[varName] -= value
+                elif operator == "*":
+                    variables[varName] *= value
+                elif operator == "/":
+                    variables[varName] /= value
+            else:
+                variables[varName] = value  # Simple assignment
+
         else:
             raise SyntaxError(f"Invalid variable update, declare variable first: {line}")
     elif line.startswith("DEFINE"):
@@ -383,13 +395,12 @@ def parseLine(line, script_lines):
         loopCode = list(_getCodeBlock(script_lines))
         while evaluateExpression(condition) == True:
             currentIterCode = deepcopy(loopCode)
-            print(loopCode)
+            # print(loopCode)
             while currentIterCode:
                 loopLine = currentIterCode.pop(0)
                 currentIterCode = list(parseLine(loopLine, iter(currentIterCode)))      #< very inefficient, should be replaced later.
 
     elif line.upper().startswith("IF"):
-        # print("ENTER IF")
         script_lines, ret = IF(_getIfCondition(line), script_lines).runIf()
         print(f"IF returned {ret} code")
     elif line.upper().startswith("END_IF"):
