@@ -175,6 +175,7 @@ def _getCodeBlock(linesIter):
 def evaluateExpression(expression):
     """Evaluates an expression with variables and returns the result."""
     # Replace variables (e.g., $FOO) in the expression with their values
+    expression = re.sub(r'\b(true|false)\b', lambda m: m.group(0).capitalize(), expression, flags=re.IGNORECASE)  #< fix capitalization mistakes in true and false (for evaluating with booleans)
     expression = re.sub(r"\$(\w+)", lambda m: str(variables.get(f"${m.group(1)}", 0)), expression)
 
     expression = expression.replace("^", "**")     #< Replace ^ with ** for exponentiation
