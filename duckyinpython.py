@@ -349,29 +349,15 @@ def parseLine(line, script_lines):
         else:
             raise SyntaxError(f"Invalid variable declaration: {line}")
     elif line.startswith("$"):
-        match = re.match(r"\$(\w+)\s*([\+\-\*/]?)=\s*(.+)", line)
+        match = re.match(r"\$(\w+)\s*=\s*(.+)", line)
         if match:
-            varName = f"${match.group(1)}"  # Extract variable name
-            operator = match.group(2)  # Extract the operator (if any)
-            expression = match.group(3)  # Extract the right-hand side
+            varName = f"${match.group(1)}"
+            expression = match.group(2)
+            value = evaluateExpression(expression)
+            variables[varName] = value
 
-            # Ensure the variable exists before updating
-            if operator and varName not in variables:
-                raise SyntaxError(f"Invalid variable update, declare variable first: {line}")
-
-            value = evaluateExpression(expression)  # Evaluate the expression
-
-            if operator:  # Handling updates like +=, -=, etc.
-                if operator == "+":
-                    variables[varName] += value
-                elif operator == "-":
-                    variables[varName] -= value
-                elif operator == "*":
-                    variables[varName] *= value
-                elif operator == "/":
-                    variables[varName] /= value
-            else:
-                variables[varName] = value  # Simple assignment
+            value = evaluateExpression(expression)
+            variables[varName] = value
 
         else:
             raise SyntaxError(f"Invalid variable update, declare variable first: {line}")
