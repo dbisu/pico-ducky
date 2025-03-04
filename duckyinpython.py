@@ -356,9 +356,6 @@ def parseLine(line, script_lines):
             value = evaluateExpression(expression)
             variables[varName] = value
 
-            value = evaluateExpression(expression)
-            variables[varName] = value
-
         else:
             raise SyntaxError(f"Invalid variable update, declare variable first: {line}")
     elif line.startswith("DEFINE"):
