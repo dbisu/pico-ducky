@@ -172,10 +172,18 @@ def _getCodeBlock(linesIter):
         code.append(line)
     return code
 
+def replaceBooleans(text):                             #< fix capitalization mistakes in true and false (for evaluating with booleans)
+    # Replace any letter-by-letter match for "true" with the proper "True"
+    text = re.sub(r'[Tt][Rr][Uu][Ee]', 'True', text)
+    # Replace any letter-by-letter match for "false" with the proper "False"
+    text = re.sub(r'[Ff][Aa][Ll][Ss][Ee]', 'False', text)
+    return text
+
 def evaluateExpression(expression):
     """Evaluates an expression with variables and returns the result."""
-    # Replace variables (e.g., $FOO) in the expression with their values
-    expression = re.sub(r"\$(\w+)", lambda m: str(variables.get(f"${m.group(1)}", 0)), expression)
+    expression = replaceVariables(expression)
+    expression = replaceBooleans(expression)       #< Cant use re due its limitation in circutpython
+    print(expression)
 
     expression = expression.replace("^", "**")     #< Replace ^ with ** for exponentiation
     expression = expression.replace("&&", "and")
@@ -347,6 +355,7 @@ def parseLine(line, script_lines):
             expression = match.group(2)
             value = evaluateExpression(expression)
             variables[varName] = value
+
         else:
             raise SyntaxError(f"Invalid variable update, declare variable first: {line}")
     elif line.startswith("DEFINE"):
@@ -369,13 +378,12 @@ def parseLine(line, script_lines):
         loopCode = list(_getCodeBlock(script_lines))
         while evaluateExpression(condition) == True:
             currentIterCode = deepcopy(loopCode)
-            print(loopCode)
+            # print(loopCode)
             while currentIterCode:
                 loopLine = currentIterCode.pop(0)
                 currentIterCode = list(parseLine(loopLine, iter(currentIterCode)))      #< very inefficient, should be replaced later.
 
     elif line.upper().startswith("IF"):
-        # print("ENTER IF")
         script_lines, ret = IF(_getIfCondition(line), script_lines).runIf()
         print(f"IF returned {ret} code")
     elif line.upper().startswith("END_IF"):
