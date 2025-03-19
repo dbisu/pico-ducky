@@ -73,7 +73,7 @@ response_html = """<!DOCTYPE html>
 </html>
 """
 
-newrow_html = "<tr><td>{}</td><td><a href='/edit/{}'>Edit</a> / <a href='/run/{}'>Run</a></tr>"
+newrow_html = "<tr><td>{}</td><td><a href='/edit/{}'>Edit</a> / <a href='/delete/{}'>Delete</a> / <a href='/run/{}'>Run</a></tr>"
 
 def setPayload(payload_number):
     if(payload_number == 1):
@@ -94,7 +94,7 @@ def ducky_main(request):
     for f in files:
         if ('.dd' in f) == True:
             payloads.append(f)
-            newrow = newrow_html.format(f,f,f)
+            newrow = newrow_html.format(f,f,f,f)
             #print(newrow)
             rows = rows + newrow
 
@@ -172,8 +172,8 @@ def write_script(request, filename):
     textbuffer = form_data['scriptData']
     textbuffer = cleanup_text(textbuffer)
     #print(textbuffer)
-    for line in textbuffer:
-        f.write(line)
+    for line in textbuffer.splitlines():
+        f.write(line + '\n')
     f.close()
     storage.remount("/",readonly=True)
     response = response_html.format("Wrote script " + filename)
@@ -193,15 +193,26 @@ def write_new_script(request):
             form_data[key] = value
         #print(form_data)
         filename = form_data['scriptName']
+        if ".dd" not in filename:
+            filename = filename + ".dd"
         textbuffer = form_data['scriptData']
         textbuffer = cleanup_text(textbuffer)
         storage.remount("/",readonly=False)
         f = open(filename,"w",encoding='utf-8')
-        for line in textbuffer:
-            f.write(line)
+        for line in textbuffer.splitlines():
+            f.write(line + '\n')
         f.close()
         storage.remount("/",readonly=True)
         response = response_html.format("Wrote script " + filename)
+    return("200 OK",[('Content-Type', 'text/html')], response)
+
+@web_app.route("/delete/<filename>")
+def delete(request, filename):
+    print("Deleting ", filename)
+    storage.remount("/",readonly=False)
+    os.remove(filename)
+    response = response_html.format("Deleted script " + filename)
+    storage.remount("/",readonly=True)
     return("200 OK",[('Content-Type', 'text/html')], response)
 
 @web_app.route("/run/<filename>")
