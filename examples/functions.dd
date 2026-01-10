@@ -1,0 +1,13 @@
+REM Example Function
+FUNCTION COUNTDOWN()
+	REM The next four lines open Notepad in Windows and type "Hello World!"
+	GUI r
+	DELAY 1000
+	STRING notepad
+	ENTER
+	DELAY 2000
+	STRING Hello World!
+	ENTER
+END_FUNCTION
+COUNTDOWN()
+

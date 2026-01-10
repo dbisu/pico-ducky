@@ -1,4 +1,4 @@
-REM The next four lines open Notepad in Windows and type "Hello World!"
+REM The next five lines open Notepad in Windows and type "Hello World!"
 GUI r
 STRING notepad
 ENTER
