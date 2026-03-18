@@ -1,5 +1,5 @@
 # License : GPLv2.0
-# copyright (c) 2023  Dave Bailey
+# copyright (c) 2026  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
 #
 #  TODO: ADD support for the following:
@@ -298,7 +298,7 @@ async def parseLine(line, script_lines):
             print(f"Unknown key to RELEASE: <{key}>")
     elif(line[0:5] == "DELAY"):
         line = replaceVariables(line)
-        time.sleep(float(line[6:])/1000)
+        await asyncio.sleep(float(line[6:])/1000)
     elif line == "STRINGLN":               #< stringLN block
         line = next(script_lines).strip()
         line = replaceVariables(line)
@@ -495,7 +495,7 @@ async def runScript(file):
                         for i in range(int(line[7:])):
                             #repeat the last command
                             parseLine(previousLine, script_lines)
-                            time.sleep(float(defaultDelay) / 1000)
+                            await asyncio.sleep(float(defaultDelay) / 1000)
                     elif line.startswith("RESTART_PAYLOAD"):
                         restart = True
                         break
@@ -505,7 +505,7 @@ async def runScript(file):
                     else:
                         await parseLine(line, script_lines)
                         previousLine = line
-                    time.sleep(float(defaultDelay) / 1000)
+                    await asyncio.sleep(float(defaultDelay) / 1000)
     except OSError as e:
         print("Unable to open file", file)
 

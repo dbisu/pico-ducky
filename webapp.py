@@ -7,6 +7,7 @@ import socketpool
 import time
 import os
 import storage
+import asyncio
 
 import wsgiserver as server
 from adafruit_wsgi.wsgi_app import WSGIApp
@@ -225,11 +226,11 @@ def delete(request, filename):
     return("200 OK",[('Content-Type', 'text/html')], response)
 
 @web_app.route("/run/<filename>")
-def run_script(request, filename):
+async def run_script(request, filename):
     print("run_script ", filename)
     response = response_html.format("Running script " + filename)
     #print(response)
-    runScript(filename)
+    await runScript(filename)
     return("200 OK",[('Content-Type', 'text/html')], response)
 
 @web_app.route("/")
@@ -238,12 +239,12 @@ def index(request):
     return("200 OK", [('Content-Type', 'text/html')], response)
 
 @web_app.route("/api/run/<filenumber>")
-def run_script(request, filenumber):
+async def run_script(request, filenumber):
     filename = setPayload(int(filenumber))
     print("run_script ", filenumber)
     response = response_html.format("Running script " + filename)
     #print(response)
-    runScript(filename)
+    await runScript(filename)
     return("200 OK",[('Content-Type', 'text/html')], response)
 
 async def startWebService():
