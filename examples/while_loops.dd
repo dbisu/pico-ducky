@@ -2,6 +2,6 @@ VAR $TIME = 3
 WHILE ($TIME > 0)
 	STRING .
 	DELAY 500
-	STRING While Looop!!
+	STRING While Loop!!
 	ENTER
 END_WHILE
