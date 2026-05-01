@@ -8,6 +8,7 @@
 import re
 import time
 import random
+import pwmio
 import digitalio
 from digitalio import DigitalInOut, Pull
 from adafruit_debouncer import Debouncer
@@ -16,9 +17,10 @@ from board import *
 import asyncio
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.mouse import Mouse
 from adafruit_hid.consumer_control import ConsumerControl
 from adafruit_hid.consumer_control_code import ConsumerControlCode
-from pins import *
+import microcontroller
 
 # comment out these lines for non_US keyboards
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
@@ -28,6 +30,9 @@ from adafruit_hid.keycode import Keycode
 # replace LANG with appropriate language
 #from keyboard_layout_win_LANG import KeyboardLayout as KeyboardLayout
 #from keycode_win_LANG import Keycode
+
+# Global variables dict - must be defined in this module so all functions here can access it
+variables = {}
 
 def _capsOn():
     return kbd.led_on(Keyboard.LED_CAPS_LOCK)
@@ -45,7 +50,7 @@ def pressLock(key):
 def SaveKeyboardLedState():
     variables["$_INITIAL_SCROLLLOCK"] = _scrollOn()
     variables["$_INITIAL_NUMLOCK"] = _numOn()
-    variables   ["$_INITIAL_CAPSLOCK"] = _capsOn()
+    variables["$_INITIAL_CAPSLOCK"] = _capsOn()
 
 
 def RestoreKeyboardLedState():
@@ -82,403 +87,166 @@ duckyKeys = {
     'F20': Keycode.F20, 'F21': Keycode.F21, 'F22': Keycode.F22, 'F23': Keycode.F23,
     'F24': Keycode.F24
 }
-duckyConsumerKeys = {
-    'MK_VOLUP': ConsumerControlCode.VOLUME_INCREMENT, 'MK_VOLDOWN': ConsumerControlCode.VOLUME_DECREMENT, 'MK_MUTE': ConsumerControlCode.MUTE,
-    'MK_NEXT': ConsumerControlCode.SCAN_NEXT_TRACK, 'MK_PREV': ConsumerControlCode.SCAN_PREVIOUS_TRACK,
-    'MK_PP': ConsumerControlCode.PLAY_PAUSE, 'MK_STOP': ConsumerControlCode.STOP
-}
 
-variables = {"$_RANDOM_MIN": 0, "$_RANDOM_MAX": 65535,"$_EXFIL_MODE_ENABLED": False,"$_EXFIL_LEDS_ENABLED": False,"$_INITIAL_SCROLLLOCK": False, "$_INITIAL_NUMLOCK": False, "$_INITIAL_CAPSLOCK": False}
-internalVariables = {"$_CAPSLOCK_ON": _capsOn, "$_NUMLOCK_ON": _numOn, "$_SCROLLLOCK_ON": _scrollOn}
-defines = {}
-functions = {}
+# Consumer control keys (media keys etc)
+duckyConsumerKeys = {}
 
-letters = "abcdefghijklmnopqrstuvwxyz"
-numbers = "0123456789"
-specialChars = "!@#$%^&*()"
+kbd = Keyboard(usb_hid.devices)
+layout = KeyboardLayout(kbd)
 
-class IF:
-    def __init__(self, condition, codeIter):
-        self.condition = condition
-        self.codeIter = list(codeIter)
-        self.lastIfResult = None
-    
-    def _exitIf(self):
-        _depth = 0
-        for line in self.codeIter:
-            line = self.codeIter.pop(0)
-            line = line.strip()
-            if line.upper().startswith("END_IF"):
-                _depth -= 1
-            elif line.upper().startswith("IF"):
-                _depth += 1
-            if _depth < 0:
-                print("No else, exiting" + str(list(self.codeIter)))
-                break
-        return(self.codeIter)
+mouse = Mouse(usb_hid.devices)
+cc = ConsumerControl(usb_hid.devices)
 
-    def runIf(self):
-        if isinstance(self.condition, str):
-            self.lastIfResult = evaluateExpression(self.condition)
-        elif isinstance(self.condition, bool):
-            self.lastIfResult = self.condition
-        else:
-            raise ValueError("Invalid condition type")
+#init button
+try:
+    button1_pin = DigitalInOut(GP22)
+except ValueError:
+    microcontroller.reset()
+button1_pin.pull = Pull.UP      # turn on internal pull-up resistor
+button1 = Debouncer(button1_pin)
 
-        # print(f"condition {self.condition} result is {self.lastIfResult} since \"$VAR\" is {variables["$VAR"]}, code is {self.codeIter}")
-        depth = 0
-        for line in self.codeIter:
-            line = self.codeIter.pop(0)
-            line = line.strip()
-            if line == "":
-                continue
-            # print(line)
+#init payload selection switch
+payload1Pin = digitalio.DigitalInOut(GP4)
+payload1Pin.switch_to_input(pull=digitalio.Pull.UP)
+payload2Pin = digitalio.DigitalInOut(GP5)
+payload2Pin.switch_to_input(pull=digitalio.Pull.UP)
+payload3Pin = digitalio.DigitalInOut(GP10)
+payload3Pin.switch_to_input(pull=digitalio.Pull.UP)
+payload4Pin = digitalio.DigitalInOut(GP11)
+payload4Pin.switch_to_input(pull=digitalio.Pull.UP)
+progStatusPin = digitalio.DigitalInOut(GP0)
+progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
 
-            if line.startswith("IF"):
-                depth += 1
-            elif line.startswith("END_IF"):
-                if depth == 0:
-                    return(self.codeIter, -1)
-                depth -=1
+defaultDelay = 0
 
-            elif line.startswith("ELSE") and depth == 0:
-                # print(f"ELSE LINE {line}, lastIfResult: {self.lastIfResult}")
-                if self.lastIfResult is False:
-                    line = line[4:].strip()  # Remove 'ELSE' and strip whitespace
-                    if line.startswith("IF"):
-                        nestedCondition = _getIfCondition(line)
-                        # print(f"nested IF {nestedCondition}")
-                        self.codeIter, self.lastIfResult = IF(nestedCondition, self.codeIter).runIf()
-                        if self.lastIfResult == -1 or self.lastIfResult == True:
-                            # print(f"self.lastIfResult {self.lastIfResult}")
-                            return(self.codeIter, True)
-                    else:
-                        return IF(True, self.codeIter).runIf()                        #< Regular ELSE block
-                else:
-                    self._exitIf()
-                    break
-
-            # Process regular lines
-            elif self.lastIfResult:
-                # print(f"running line {line}")
-                self.codeIter = list(parseLine(line, self.codeIter))
-        # print("end of if")
-        return(self.codeIter, self.lastIfResult)
-
-def _getIfCondition(line):
-    return str(line)[2:-4].strip()
-
-def _isCodeBlock(line):
-    line = line.upper().strip()
-    if line.startswith("IF") or line.startswith("WHILE"):
-        return True
-    return False
-
-def _getCodeBlock(linesIter):
-    """Returns the code block starting at the given line."""
-    code = []
-    depth = 1
-    for line in linesIter:
-        line = line.strip()
-        if line.upper().startswith("END_"):
-            depth -= 1
-        elif _isCodeBlock(line):
-            depth += 1
-        if depth <= 0:
-            break
-        code.append(line)
-    return code
-
-def replaceBooleans(text):                             #< fix capitalization mistakes in true and false (for evaluating with booleans)
-    # Replace any letter-by-letter match for "true" with the proper "True"
-    text = re.sub(r'[Tt][Rr][Uu][Ee]', 'True', text)
-    # Replace any letter-by-letter match for "false" with the proper "False"
-    text = re.sub(r'[Ff][Aa][Ll][Ss][Ee]', 'False', text)
-    return text
-
-def evaluateExpression(expression):
-    """Evaluates an expression with variables and returns the result."""
-    expression = replaceVariables(expression)
-    expression = replaceBooleans(expression)       #< Cant use re due its limitation in circutpython
-    print(expression)
-
-    expression = expression.replace("^", "**")     #< Replace ^ with ** for exponentiation
-    expression = expression.replace("&&", "and")
-    expression = expression.replace("||", "or")
-
-    expression = expression.replace("TRUE", "True")
-    expression = expression.replace("FALSE", "False")
-
-    return eval(expression, {}, variables)
-
-def deepcopy(List):
-    return(List[:])
+if(board.board_id == 'raspberry_pi_pico'):
+    led = pwmio.PWMOut(board.LED, frequency=5000, duty_cycle=0)
+elif(board.board_id == 'raspberry_pi_pico_w'):
+    led = digitalio.DigitalInOut(board.LED)
+    led.switch_to_output()
 
 def convertLine(line):
     commands = []
-    # print(line)
-    # loop on each key - the filter removes empty values
     for key in filter(None, line.split(" ")):
         key = key.upper()
-        # find the keycode for the command in the list
         command_keycode = duckyKeys.get(key, None)
         command_consumer_keycode = duckyConsumerKeys.get(key, None)
         if command_keycode is not None:
-            # if it exists in the list, use it
             commands.append(command_keycode)
         elif command_consumer_keycode is not None:
-            # if it exists in the list, use it
             commands.append(1000+command_consumer_keycode)
         elif hasattr(Keycode, key):
-            # if it's in the Keycode module, use it (allows any valid keycode)
             commands.append(getattr(Keycode, key))
         else:
-            # if it's not a known key name, show the error for diagnosis
             print(f"Unknown key: <{key}>")
-    # print(commands)
     return commands
 
 def runScriptLine(line):
     keys = convertLine(line)
     for k in keys:
         if k > 1000:
-            consumerControl.press(int(k-1000))
+            cc.send(int(k-1000))
         else:
             kbd.press(k)
     for k in reversed(keys):
         if k > 1000:
-            consumerControl.release()
+            pass  # consumer control releases automatically
         else:
             kbd.release(k)
 
 def sendString(line):
-    layout.write(line)
-
-def replaceVariables(line):
-    for var in variables:
-        line = line.replace(var, str(variables[var]))
-    for var in internalVariables:
-        line = line.replace(var, str(internalVariables[var]()))
-    return line
-
-def replaceDefines(line):
-    for define, value in defines.items():
-        line = line.replace(define, value)
-    return line
-
-async def parseLine(line, script_lines):
-    global defaultDelay, variables, functions, defines
-    line = line.strip()
-    line = line.replace("$_RANDOM_INT", str(random.randint(int(variables.get("$_RANDOM_MIN", 0)), int(variables.get("$_RANDOM_MAX", 65535)))))
-    line = replaceDefines(line)
-    if line[:10] == "INJECT_MOD":
-        line = line[11:]
-    elif line.startswith("REM_BLOCK"):
-        while line.startswith("END_REM") == False:
-            line = next(script_lines).strip()
-            # print(line)
-    elif(line[0:3] == "REM"):
-        pass
-    elif line.startswith("HOLD"):
-        # HOLD command to press and hold a key
-        key = line[5:].strip().upper()
-        commandKeycode = duckyKeys.get(key, None)
-        if commandKeycode:
-            kbd.press(commandKeycode)
-
+    for char in line:
+        layout.write(char)
+        if char.isupper() or char in '!@#$%^&*()_+-"7|':
+            time.sleep(0.08)
         else:
-            print(f"Unknown key to HOLD: <{key}>")
-    elif line.startswith("RELEASE"):
-        # RELEASE command to release a held key
-        key = line[8:].strip().upper()
-        commandKeycode = duckyKeys.get(key, None)
-        if commandKeycode:
-            kbd.release(commandKeycode)
-        else:
-            print(f"Unknown key to RELEASE: <{key}>")
-    elif(line[0:5] == "DELAY"):
-        line = replaceVariables(line)
-        await asyncio.sleep(float(line[6:])/1000)
-    elif line == "STRINGLN":               #< stringLN block
-        line = next(script_lines).strip()
-        line = replaceVariables(line)
-        while line.startswith("END_STRINGLN") == False:
-            sendString(line)
-            kbd.press(Keycode.ENTER)
-            kbd.release(Keycode.ENTER)
-            line = next(script_lines).strip()
-            line = replaceVariables(line)
-            line = replaceDefines(line)
-    elif(line[0:8] == "STRINGLN"):
-        sendString(replaceVariables(line[9:]))
-        kbd.press(Keycode.ENTER)
-        kbd.release(Keycode.ENTER)
-    elif line == "STRING":                 #< string block
-        line = next(script_lines).strip()
-        line = replaceVariables(line)
-        while line.startswith("END_STRING") == False:
-            sendString(line)
-            line = next(script_lines).strip()
-            line = replaceVariables(line)
-            line = replaceDefines(line)
-    elif(line[0:6] == "STRING"):
-        sendString(replaceVariables(line[7:]))
-    elif(line[0:5] == "PRINT"):
-        line = replaceVariables(line[6:])
-        print("[SCRIPT]: " + line)
-    elif(line[0:6] == "IMPORT"):
+            time.sleep(0.03)
+
+def parseMouseCommand(line):
+    if line.startswith('CLICK'):
+        if line[6:] == 'LEFT':
+            mouse.click(Mouse.LEFT_BUTTON)
+        elif line[6:] == 'RIGHT':
+            mouse.click(Mouse.RIGHT_BUTTON)
+        elif hasattr(Mouse, line[6:]):
+            mouse.click(getattr(Mouse, line[6:]))
+
+    elif line.startswith('MOVE'):
+        x, y = line[5:].split(',')
+        x, y = int(x), int(y)
+        mouse.move(x, y)
+
+    elif line.startswith('WHEEL'):
+        wheel = int(line[6:])
+        mouse.move(wheel=wheel)
+
+    elif line.startswith('PRESS'):
+        if line[6:] == 'LEFT':
+            mouse.press(Mouse.LEFT_BUTTON)
+        elif line[6:] == 'RIGHT':
+            mouse.press(Mouse.RIGHT_BUTTON)
+        elif hasattr(Mouse, line[6:]):
+            mouse.press(getattr(Mouse, line[6:]))
+
+    elif line.startswith('RELEASE'):
+        if line[8:] == 'LEFT':
+            mouse.release(Mouse.LEFT_BUTTON)
+        elif line[8:] == 'RIGHT':
+            mouse.release(Mouse.RIGHT_BUTTON)
+        elif hasattr(Mouse, line[8:]):
+            mouse.release(getattr(Mouse, line[8:]))
+
+def parseLine(line):
+    global defaultDelay
+
+    line = line.rstrip('\n\r')
+
+    if line.startswith("REM"):
+        pass  # ignore comment
+
+    elif line.startswith("DELAY"):
+        time.sleep(float(line[6:])/1000)
+
+    elif line.startswith("STRING"):
+        sendString(line[7:])
+
+    elif line.startswith("MOUSE"):
+        parseMouseCommand(line[6:])
+
+    elif line.startswith("CC"):
+        CC_KEY = line[3:]
+        if hasattr(ConsumerControlCode, CC_KEY):
+            cc.send(getattr(ConsumerControlCode, CC_KEY))
+
+    elif line.startswith("PRINT"):
+        print("[SCRIPT]: " + line[6:])
+
+    elif line.startswith("IMPORT"):
         runScript(line[7:])
-    elif(line[0:13] == "DEFAULT_DELAY"):
-        defaultDelay = int(line[14:]) * 10
-    elif(line[0:12] == "DEFAULTDELAY"):
-        defaultDelay = int(line[13:]) * 10
-    elif(line[0:3] == "LED"):
-        if(led.value == True):
-            led.value = False
-        else:
-            led.value = True
-    elif(line[0:3] == "LED"):
-        if(led.value == True):
-            led.value = False
-        else:
-            led.value = True
-    elif(line[:7] == "LED_OFF"):
-        led.value = False
-    elif(line[:5] == "LED_R"):
-        led.value = True
-    elif(line[:5] == "LED_G"):
-        led.value = True
-    elif(line[0:21] == "WAIT_FOR_BUTTON_PRESS"):
-        button_pressed = False
-        # NOTE: we don't use assincio in this case because we want to block code execution
-        while not button_pressed:
-            button1.update()
 
-            button1Pushed = button1.fell
-            button1Released = button1.rose
-            button1Held = not button1.value
+    elif line.startswith("DEFAULT_DELAY"):
+        defaultDelay = int(line[14:])
 
-            if(button1Pushed):
-                print("Button 1 pushed")
-                button_pressed = True
-    elif line.startswith("VAR"):
-        match = re.match(r"VAR\s+\$(\w+)\s*=\s*(.+)", line)
-        if match:
-            varName = f"${match.group(1)}"
-            value = evaluateExpression(match.group(2))
-            variables[varName] = value
+    elif line.startswith("DEFAULTDELAY"):
+        defaultDelay = int(line[13:])
+
+    elif line.startswith("LED"):
+        if board.board_id == 'raspberry_pi_pico':
+            led.duty_cycle = 0 if led.duty_cycle else 65535
         else:
-            raise SyntaxError(f"Invalid variable declaration: {line}")
-    elif line.startswith("$"):
-        match = re.match(r"\$(\w+)\s*=\s*(.+)", line)
-        if match:
-            varName = f"${match.group(1)}"
-            expression = match.group(2)
-            value = evaluateExpression(expression)
-            variables[varName] = value
+            led.value = not led.value
 
-        else:
-            raise SyntaxError(f"Invalid variable update, declare variable first: {line}")
-    elif line.startswith("DEFINE"):
-        defineLocation = line.find(" ")
-        valueLocation = line.find(" ", defineLocation + 1)
-        defineName = line[defineLocation+1:valueLocation]
-        defineValue = line[valueLocation+1:]
-        defines[defineName] = defineValue
-    elif line.startswith("FUNCTION"):
-        # print("ENTER FUNCTION")
-        func_name = line.split()[1]
-        functions[func_name] = []
-        line = next(script_lines).strip()
-        while line != "END_FUNCTION":
-            functions[func_name].append(line)
-            line = next(script_lines).strip()
-    elif line.startswith("WHILE"):
-        # print("ENTER WHILE LOOP")
-        condition = line[5:].strip()
-        loopCode = list(_getCodeBlock(script_lines))
-        while evaluateExpression(condition) == True:
-            currentIterCode = deepcopy(loopCode)
-            # print(loopCode)
-            while currentIterCode:
-                loopLine = currentIterCode.pop(0)
-                currentIterCode = list(parseLine(loopLine, iter(currentIterCode)))      #< very inefficient, should be replaced later.
+    elif line.strip() == "":
+        pass  # skip blank lines
 
-    elif line.upper().startswith("IF"):
-        script_lines, ret = IF(_getIfCondition(line), script_lines).runIf()
-        print(f"IF returned {ret} code")
-    elif line.upper().startswith("END_IF"):
-        pass
-    elif line == "RANDOM_LOWERCASE_LETTER":
-        sendString(random.choice(letters))
-    elif line == "RANDOM_UPPERCASE_LETTER":
-        sendString(random.choice(letters.upper()))
-    elif line == "RANDOM_LETTER":
-        sendString(random.choice(letters + letters.upper()))
-    elif line == "RANDOM_NUMBER":
-        sendString(random.choice(numbers))
-    elif line == "RANDOM_SPECIAL":
-        sendString(random.choice(specialChars))
-    elif line == "RANDOM_CHAR":
-        sendString(random.choice(letters + letters.upper() + numbers + specialChars))
-    elif line == "VID_RANDOM" or line == "PID_RANDOM":
-        for _ in range(4):
-            sendString(random.choice("0123456789ABCDEF"))
-    elif line == "MAN_RANDOM" or line == "PROD_RANDOM":
-        for _ in range(12):
-            sendString(random.choice(letters + letters.upper() + numbers))
-    elif line == "SERIAL_RANDOM":
-        for _ in range(12):
-            sendString(random.choice(letters + letters.upper() + numbers + specialChars))
-    elif line == "RESET":
-        kbd.release_all()
-    elif line == "SAVE_HOST_KEYBOARD_LOCK_STATE":
-        SaveKeyboardLedState()
-    elif line == "RESTORE_HOST_KEYBOARD_LOCK_STATE":
-        RestoreKeyboardLedState()
-    elif line == "WAIT_FOR_SCROLL_CHANGE":
-        last_scroll_state = _scrollOn()
-        while True: 
-            current_scroll_state = _scrollOn()
-            if current_scroll_state != last_scroll_state:
-                break
-            await asyncio.sleep(0.01)
-    elif line in functions:
-        updated_lines = []
-        inside_while_block = False
-        for func_line in functions[line]:
-            if func_line.startswith("WHILE"):
-                inside_while_block = True  # Start skipping lines
-                updated_lines.append(func_line)
-            elif func_line.startswith("END_WHILE"):
-                inside_while_block = False  # Stop skipping lines
-                updated_lines.append(func_line)
-                parseLine(updated_lines[0], iter(updated_lines))
-                updated_lines = []  # Clear updated_lines after parsing
-            elif inside_while_block:
-                updated_lines.append(func_line)
-            elif not (func_line.startswith("END_WHILE") or func_line.startswith("WHILE")):
-                parseLine(func_line, iter(functions[line]))
     else:
         runScriptLine(line)
-    
-    return(script_lines)
-
-kbd = Keyboard(usb_hid.devices)
-consumerControl = ConsumerControl(usb_hid.devices)
-layout = KeyboardLayout(kbd)
-
-
 
 def getProgrammingStatus():
-    # see setup mode for instructions
     progStatus = not progStatusPin.value
     return(progStatus)
 
-
-defaultDelay = 0
-
-async def runScript(file):
+def runScript(file):
     global defaultDelay
 
     duckyScriptPath = file
@@ -487,113 +255,91 @@ async def runScript(file):
         while restart:
             restart = False
             with open(duckyScriptPath, "r", encoding='utf-8') as f:
-                script_lines = iter(f.readlines())
-                previousLine = ""
-                for line in script_lines:
-                    print(f"runScript: {line}")
-                    if(line[0:6] == "REPEAT"):
-                        for i in range(int(line[7:])):
-                            #repeat the last command
-                            parseLine(previousLine, script_lines)
-                            await asyncio.sleep(float(defaultDelay) / 1000)
-                    elif line.startswith("RESTART_PAYLOAD"):
-                        restart = True
-                        break
-                    elif line.startswith("STOP_PAYLOAD"):
-                        restart = False
-                        break
-                    else:
-                        await parseLine(line, script_lines)
-                        previousLine = line
-                    await asyncio.sleep(float(defaultDelay) / 1000)
+                script_lines = f.readlines()
+            previousLine = ""
+            i = 0
+            while i < len(script_lines):
+                line = script_lines[i]
+                line = line.rstrip('\n\r')
+                print(f"runScript: {line}")
+                if line.startswith("REPEAT"):
+                    count = int(line[7:])
+                    for _ in range(count):
+                        parseLine(previousLine)
+                        time.sleep(float(defaultDelay) / 1000)
+                elif line.startswith("RESTART_PAYLOAD"):
+                    restart = True
+                    break
+                elif line.startswith("STOP_PAYLOAD"):
+                    restart = False
+                    break
+                else:
+                    parseLine(line)
+                    previousLine = line
+                time.sleep(float(defaultDelay) / 1000)
+                i += 1
     except OSError as e:
         print("Unable to open file", file)
 
 def selectPayload():
-    global payload1Pin, payload2Pin, payload3Pin, payload4Pin
     payload = "payload.dd"
-    # check switch status
     payload1State = not payload1Pin.value
     payload2State = not payload2Pin.value
     payload3State = not payload3Pin.value
     payload4State = not payload4Pin.value
 
-    if(payload1State == True):
+    if payload1State:
         payload = "payload.dd"
-
-    elif(payload2State == True):
+    elif payload2State:
         payload = "payload2.dd"
-
-    elif(payload3State == True):
+    elif payload3State:
         payload = "payload3.dd"
-
-    elif(payload4State == True):
+    elif payload4State:
         payload = "payload4.dd"
-
     else:
-        # if all pins are high, then no switch is present
-        # default to payload1
         payload = "payload.dd"
 
     return payload
 
-async def blink_led(led):
-    print("Blink")
-    if(board.board_id == 'raspberry_pi_pico' or board.board_id == 'raspberry_pi_pico2'):
-        blink_pico_led(led)
-    elif(board.board_id == 'raspberry_pi_pico_w' or board.board_id == 'raspberry_pi_pico2_w'):
-        blink_pico_w_led(led)
-
-
-async def blink_pico_led(led):
+async def blink_pico_led():
     print("starting blink_pico_led")
     led_state = False
     while True:
-        if(variables.get("$_EXFIL_LEDS_ENABLED")):
+        if variables.get("$_EXFIL_LEDS_ENABLED"):
             led.duty_cycle = 65535
         else:
             if led_state:
-                #led_pwm_up(led)
-                #print("led up")
                 for i in range(100):
-                    # PWM LED up and down
                     if i < 50:
-                        led.duty_cycle = int(i * 2 * 65535 / 100)  # Up
+                        led.duty_cycle = int(i * 2 * 65535 / 100)
                     await asyncio.sleep(0.01)
                 led_state = False
             else:
-                #led_pwm_down(led)
-                #print("led down")
                 for i in range(100):
-                    # PWM LED up and down
                     if i >= 50:
-                        led.duty_cycle = 65535 - int((i - 50) * 2 * 65535 / 100)  # Down
+                        led.duty_cycle = 65535 - int((i - 50) * 2 * 65535 / 100)
                     await asyncio.sleep(0.01)
                 led_state = True
         await asyncio.sleep(0)
 
-async def blink_pico_w_led(led):
+async def blink_pico_w_led():
     print("starting blink_pico_w_led")
     led_state = False
     while True:
-        if(variables.get("$_EXFIL_LEDS_ENABLED")):
+        if variables.get("$_EXFIL_LEDS_ENABLED"):
             led.value = 1
-        else: 
+        else:
             if led_state:
-                #print("led on")
                 led.value = 1
                 await asyncio.sleep(0.5)
                 led_state = False
             else:
-                #print("led off")
                 led.value = 0
                 await asyncio.sleep(0.5)
                 led_state = True
             await asyncio.sleep(0.5)
 
-
 async def monitor_buttons(button1):
-    global inBlinkeyMode, inMenu, enableRandomBeep, enableSirenMode,pixel
     print("starting monitor_buttons")
     button1Down = False
     while True:
@@ -601,22 +347,20 @@ async def monitor_buttons(button1):
 
         button1Pushed = button1.fell
         button1Released = button1.rose
-        button1Held = not button1.value
 
-        if(button1Pushed):
+        if button1Pushed:
             print("Button 1 pushed")
             button1Down = True
-        if(button1Released):
+        if button1Released:
             print("Button 1 released")
-            if(button1Down):
+            if button1Down:
                 print("push and released")
 
-        if(button1Released):
-            if(button1Down):
-                # Run selected payload
+        if button1Released:
+            if button1Down:
                 payload = selectPayload()
                 print("Running ", payload)
-                await runScript(payload)
+                runScript(payload)
                 print("Done")
             button1Down = False
 
@@ -641,7 +385,7 @@ async def monitor_led_changes():
 
                         if caps_state != last_caps_state:
                             bit_list.append(0)
-                            last_caps_state = caps_state 
+                            last_caps_state = caps_state
 
                         elif num_state != last_num_state:
                             bit_list.append(1)
@@ -656,11 +400,10 @@ async def monitor_led_changes():
 
                         if scroll_state != last_scroll_state:
                             variables["$_EXFIL_LEDS_ENABLED"] = False
-                            break            
-                        
+                            break
+
                         await asyncio.sleep(0.001)
             except Exception as e:
                 print(f"Error occurred: {e}")
 
         await asyncio.sleep(0.0)
-

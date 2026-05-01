@@ -1,0 +1,6 @@
+REM Max out the volume
+REM Every time you press the button, the volume increases by 2,
+REM so to make sure the volume is at its maximum, you need to press it 50 times.
+
+CC VOLUME_INCREMENT
+REPEAT 49
