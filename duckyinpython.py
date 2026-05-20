@@ -494,7 +494,7 @@ async def runScript(file):
                     if(line[0:6] == "REPEAT"):
                         for i in range(int(line[7:])):
                             #repeat the last command
-                            parseLine(previousLine, script_lines)
+                            await parseLine(previousLine, script_lines)
                             await asyncio.sleep(float(defaultDelay) / 1000)
                     elif line.startswith("RESTART_PAYLOAD"):
                         restart = True
