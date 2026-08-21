@@ -436,6 +436,38 @@ async def parseLine(line, script_lines):
         SaveKeyboardLedState()
     elif line == "RESTORE_HOST_KEYBOARD_LOCK_STATE":
         RestoreKeyboardLedState()
+    elif line == "WAIT_FOR_CAPS_ON":
+        while not _capsOn():
+            await asyncio.sleep(0.01)
+    elif line == "WAIT_FOR_CAPS_OFF":
+        while _capsOn():
+            await asyncio.sleep(0.01)
+    elif line == "WAIT_FOR_CAPS_CHANGE":
+        last_caps_state = _capsOn()
+        while True:
+            current_caps_state = _capsOn()
+            if current_caps_state != last_caps_state:
+                break
+            await asyncio.sleep(0.01)
+    elif line == "WAIT_FOR_NUM_ON":
+        while not _numOn():
+            await asyncio.sleep(0.01)
+    elif line == "WAIT_FOR_NUM_OFF":
+        while _numOn():
+            await asyncio.sleep(0.01)
+    elif line == "WAIT_FOR_NUM_CHANGE":
+        last_num_state = _numOn()
+        while True:
+            current_num_state = _numOn()
+            if current_num_state != last_num_state:
+                break
+            await asyncio.sleep(0.01)
+    elif line == "WAIT_FOR_SCROLL_ON":
+        while not _scrollOn():
+            await asyncio.sleep(0.01)
+    elif line == "WAIT_FOR_SCROLL_OFF":
+        while _scrollOn():
+            await asyncio.sleep(0.01)
     elif line == "WAIT_FOR_SCROLL_CHANGE":
         last_scroll_state = _scrollOn()
         while True: 
