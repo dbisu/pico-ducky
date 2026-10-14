@@ -1,4 +1,4 @@
-# [2026-10-14] Fix: add missing awaits for async DuckyScript 3.0 commands (IF/WHILE/FUNCTION/REPEAT/IMPORT)
+# [2026-10-14/15] Fixes: (1) missing awaits for DuckyScript 3.0 commands, (2) payload continuation after IF/END_IF
 # License : GPLv2.0
 # copyright (c) 2026  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
@@ -490,7 +490,11 @@ async def runScript(file):
             with open(duckyScriptPath, "r", encoding='utf-8') as f:
                 script_lines = iter(f.readlines())
                 previousLine = ""
-                for line in script_lines:
+                while True:
+                    try:
+                        line = next(script_lines)
+                    except StopIteration:
+                        break
                     print(f"runScript: {line}")
                     if(line[0:6] == "REPEAT"):
                         for i in range(int(line[7:])):
@@ -504,7 +508,7 @@ async def runScript(file):
                         restart = False
                         break
                     else:
-                        await parseLine(line, script_lines)
+                        script_lines = iter(await parseLine(line, script_lines))
                         previousLine = line
                     await asyncio.sleep(float(defaultDelay) / 1000)
     except OSError as e:
