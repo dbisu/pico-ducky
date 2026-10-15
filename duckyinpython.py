@@ -1,3 +1,4 @@
+# [2026-10-14/15] Fixes: (1) missing awaits for DuckyScript 3.0 commands, (2) payload continuation after IF/END_IF
 # License : GPLv2.0
 # copyright (c) 2026  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
@@ -117,7 +118,7 @@ class IF:
                 break
         return(self.codeIter)
 
-    def runIf(self):
+    async def runIf(self):
         if isinstance(self.condition, str):
             self.lastIfResult = evaluateExpression(self.condition)
         elif isinstance(self.condition, bool):
@@ -148,12 +149,12 @@ class IF:
                     if line.startswith("IF"):
                         nestedCondition = _getIfCondition(line)
                         # print(f"nested IF {nestedCondition}")
-                        self.codeIter, self.lastIfResult = IF(nestedCondition, self.codeIter).runIf()
+                        self.codeIter, self.lastIfResult = await IF(nestedCondition, self.codeIter).runIf()
                         if self.lastIfResult == -1 or self.lastIfResult == True:
                             # print(f"self.lastIfResult {self.lastIfResult}")
                             return(self.codeIter, True)
                     else:
-                        return IF(True, self.codeIter).runIf()                        #< Regular ELSE block
+                        return await IF(True, self.codeIter).runIf()                        #< Regular ELSE block
                 else:
                     self._exitIf()
                     break
@@ -161,7 +162,7 @@ class IF:
             # Process regular lines
             elif self.lastIfResult:
                 # print(f"running line {line}")
-                self.codeIter = list(parseLine(line, self.codeIter))
+                self.codeIter = list(await parseLine(line, self.codeIter))
         # print("end of if")
         return(self.codeIter, self.lastIfResult)
 
@@ -327,7 +328,7 @@ async def parseLine(line, script_lines):
         line = replaceVariables(line[6:])
         print("[SCRIPT]: " + line)
     elif(line[0:6] == "IMPORT"):
-        runScript(line[7:])
+        await runScript(line[7:])
     elif(line[0:13] == "DEFAULT_DELAY"):
         defaultDelay = int(line[14:]) * 10
     elif(line[0:12] == "DEFAULTDELAY"):
@@ -402,10 +403,10 @@ async def parseLine(line, script_lines):
             # print(loopCode)
             while currentIterCode:
                 loopLine = currentIterCode.pop(0)
-                currentIterCode = list(parseLine(loopLine, iter(currentIterCode)))      #< very inefficient, should be replaced later.
+                currentIterCode = list(await parseLine(loopLine, iter(currentIterCode)))      #< very inefficient, should be replaced later.
 
     elif line.upper().startswith("IF"):
-        script_lines, ret = IF(_getIfCondition(line), script_lines).runIf()
+        script_lines, ret = await IF(_getIfCondition(line), script_lines).runIf()
         print(f"IF returned {ret} code")
     elif line.upper().startswith("END_IF"):
         pass
@@ -453,12 +454,12 @@ async def parseLine(line, script_lines):
             elif func_line.startswith("END_WHILE"):
                 inside_while_block = False  # Stop skipping lines
                 updated_lines.append(func_line)
-                parseLine(updated_lines[0], iter(updated_lines))
+                await parseLine(updated_lines[0], iter(updated_lines))
                 updated_lines = []  # Clear updated_lines after parsing
             elif inside_while_block:
                 updated_lines.append(func_line)
             elif not (func_line.startswith("END_WHILE") or func_line.startswith("WHILE")):
-                parseLine(func_line, iter(functions[line]))
+                await parseLine(func_line, iter(functions[line]))
     else:
         runScriptLine(line)
     
@@ -489,12 +490,16 @@ async def runScript(file):
             with open(duckyScriptPath, "r", encoding='utf-8') as f:
                 script_lines = iter(f.readlines())
                 previousLine = ""
-                for line in script_lines:
+                while True:
+                    try:
+                        line = next(script_lines)
+                    except StopIteration:
+                        break
                     print(f"runScript: {line}")
                     if(line[0:6] == "REPEAT"):
                         for i in range(int(line[7:])):
                             #repeat the last command
-                            parseLine(previousLine, script_lines)
+                            await parseLine(previousLine, script_lines)
                             await asyncio.sleep(float(defaultDelay) / 1000)
                     elif line.startswith("RESTART_PAYLOAD"):
                         restart = True
@@ -503,7 +508,7 @@ async def runScript(file):
                         restart = False
                         break
                     else:
-                        await parseLine(line, script_lines)
+                        script_lines = iter(await parseLine(line, script_lines))
                         previousLine = line
                     await asyncio.sleep(float(defaultDelay) / 1000)
     except OSError as e:
